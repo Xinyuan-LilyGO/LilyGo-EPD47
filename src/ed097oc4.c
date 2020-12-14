@@ -4,6 +4,7 @@
 #include "rmt_pulse.h"
 
 #include "xtensa/core-macros.h"
+#include <string.h>
 
 typedef struct {
   bool ep_latch_enable : 1;
@@ -104,6 +105,7 @@ void epd_base_init(uint32_t epd_row_width) {
 
 void epd_poweron() {
   // POWERON
+  config_reg.ep_scan_direction = true;
   config_reg.power_disable = false;
   push_cfg(&config_reg);
   busy_delay(100 * 240);
@@ -129,7 +131,20 @@ void epd_poweroff() {
   busy_delay(100 * 240);
   config_reg.power_disable = true;
   push_cfg(&config_reg);
+
+  config_reg.ep_stv = false;
+  push_cfg(&config_reg);
+
+  config_reg.ep_scan_direction = false;
+  push_cfg(&config_reg);
+
   // END POWEROFF
+}
+
+void epd_poweroff_all()
+{
+    memset(&config_reg, 0, sizeof(config_reg));
+    push_cfg(&config_reg);
 }
 
 void epd_start_frame() {

@@ -73,6 +73,7 @@ void epd_poweroff();
 /** Clear the whole screen by flashing it. */
 void epd_clear();
 
+void epd_poweroff_all();
 /**
  * Clear an area by flashing it.
  *

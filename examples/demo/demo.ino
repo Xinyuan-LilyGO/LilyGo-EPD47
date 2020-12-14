@@ -31,7 +31,6 @@ void setup()
 
 void loop()
 {
-    delay(300);
 
     epd_poweron();
     volatile uint32_t t1 = millis();
@@ -39,11 +38,6 @@ void loop()
     volatile uint32_t t2 = millis();
     printf("EPD clear took %dms.\n", t2 - t1);
     epd_poweroff();
-
-    epd_draw_hline(20, 20, EPD_WIDTH - 40, 0x00, framebuffer);
-    epd_draw_hline(20, EPD_HEIGHT - 20, EPD_WIDTH - 40, 0x00, framebuffer);
-    epd_draw_vline(20, 20, EPD_HEIGHT - 40 + 1, 0x00, framebuffer);
-    epd_draw_vline(EPD_WIDTH - 20, 20, EPD_HEIGHT - 40 + 1, 0x00, framebuffer);
 
     Rect_t area = {
         .x = 230,
@@ -80,11 +74,11 @@ void loop()
     delay(500);
 
     epd_poweroff();
-    delay(5000);
+    delay(1000);
+    
+    epd_poweroff_all();
 
-
-
-    // esp_sleep_enable_ext1_wakeup(GPIO_SEL_39, ESP_EXT1_WAKEUP_ALL_LOW);
-    // esp_deep_sleep_start();
+    esp_sleep_enable_ext1_wakeup(GPIO_SEL_39, ESP_EXT1_WAKEUP_ALL_LOW);
+    esp_deep_sleep_start();
 
 }

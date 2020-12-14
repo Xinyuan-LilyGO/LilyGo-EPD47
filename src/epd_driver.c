@@ -304,7 +304,6 @@ void IRAM_ATTR nibble_shift_buffer_right(uint8_t *buf, uint32_t len)
 void IRAM_ATTR bit_shift_buffer_right(uint8_t *buf, uint32_t len, int shift)
 {
     uint8_t carry = 0x00;
-    uint8_t mask = 0;
     for (uint32_t i = 0; i < len; i++) {
         uint8_t val = buf[i];
         buf[i] = (val << shift) | carry;

@@ -135,8 +135,8 @@ void epd_poweroff() {
   config_reg.ep_stv = false;
   push_cfg(&config_reg);
 
-  config_reg.ep_scan_direction = false;
-  push_cfg(&config_reg);
+//   config_reg.ep_scan_direction = false;
+//   push_cfg(&config_reg);
 
   // END POWEROFF
 }

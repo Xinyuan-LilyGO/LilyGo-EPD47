@@ -57,6 +57,7 @@ Rect_t area1 = {
     .height =  EPD_HEIGHT / 2 + 80
 };
 uint8_t state = 1;
+uint8_t buf[2] = {0xD1, 0X05};
 
 void setup()
 {
@@ -113,6 +114,7 @@ void setup()
 
 
 
+
 void loop()
 {
     uint16_t  x, y;
@@ -152,12 +154,22 @@ void loop()
                 epd_clear_area(area1);
                 write_string((GFXfont *)&FiraSans, "DeepSleep", &cursor_x, &cursor_y, NULL);
 
+                /*
+                * After calling sleep, you cannot use touch to wake up, you must call wakeup to wake up
+                * * */
+                touch.sleep();
+                delay(5);
+
                 pinMode(14, INPUT);
                 pinMode(15, INPUT);
 
                 epd_poweroff_all();
 
-                esp_sleep_enable_ext1_wakeup(GPIO_SEL_13, ESP_EXT1_WAKEUP_ANY_HIGH);
+                // esp_sleep_enable_ext1_wakeup(GPIO_SEL_13, ESP_EXT1_WAKEUP_ANY_HIGH);
+
+                // Set to wake up by GPIO39
+                esp_sleep_enable_ext1_wakeup(GPIO_SEL_39, ESP_EXT1_WAKEUP_ALL_LOW);
+
                 esp_deep_sleep_start();
                 break;
             case 4:

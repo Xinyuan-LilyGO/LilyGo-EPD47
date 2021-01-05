@@ -5,8 +5,11 @@ bool TouchClass::begin(TwoWire &port, uint8_t addr)
     _i2cPort = &port;
     _address = addr;
     _i2cPort->beginTransmission(_address);
-    return 0 == _i2cPort->endTransmission();
-
+    if (0 == _i2cPort->endTransmission()) {
+        wakeup();
+        return true;
+    }
+    return false;
 }
 
 void TouchClass::readBytes(uint8_t *data, uint8_t nbytes)
@@ -107,8 +110,21 @@ void TouchClass::getPoint(uint16_t &x, uint16_t &y, uint8_t index)
 }
 
 
+void TouchClass::sleep(void)
+{
+    uint8_t buf[2] = {0xD1, 0X05};
+    _i2cPort->beginTransmission(_address);
+    _i2cPort->write(buf, 2);
+    _i2cPort->endTransmission();
+}
 
-
+void TouchClass::wakeup(void)
+{
+    uint8_t buf[2] = {0xD1, 0X06};
+    _i2cPort->beginTransmission(_address);
+    _i2cPort->write(buf, 2);
+    _i2cPort->endTransmission();
+}
 
 
 

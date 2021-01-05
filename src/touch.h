@@ -20,6 +20,8 @@ public:
 
     uint8_t scanPoint();
     void    getPoint(uint16_t &x, uint16_t &y, uint8_t index);
+    void    sleep(void);
+    void    wakeup(void);
 
     TouchData_t data[5];
 

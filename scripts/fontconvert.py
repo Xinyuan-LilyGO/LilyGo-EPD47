@@ -25,13 +25,13 @@ font_name = args.name
 # must not overlap and be in ascending order
 intervals = [
     (32, 126),
-    (160, 255),
-    (0x2500, 0x259F),
-    (0x2700, 0x27BF),
-    # powerline symbols
-    (0xE0A0, 0xE0A2),
-    (0xE0B0, 0xE0B3),
-    (0x1F600, 0x1F680),
+    # (160, 255),
+    # (0x2500, 0x259F),
+    # (0x2700, 0x27BF),
+    # # powerline symbols
+    # (0xE0A0, 0xE0A2),
+    # (0xE0B0, 0xE0B3),
+    # (0x1F600, 0x1F680),
 ]
 
 

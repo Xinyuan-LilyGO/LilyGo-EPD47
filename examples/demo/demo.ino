@@ -1,43 +1,42 @@
-/* Simple firmware for a ESP32 displaying a static image on an EPaper Screen.
- *
- * Write an image into a header file using a 3...2...1...0 format per pixel,
- * for 4 bits color (16 colors - well, greys.) MSB first.  At 80 MHz, screen
- * clears execute in 1.075 seconds and images are drawn in 1.531 seconds.
- */
+#ifndef BOARD_HAS_PSRAM
+#error "Please enable PSRAM !!!"
+#endif
 
 #include <Arduino.h>
 #include <esp_task_wdt.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "epd_driver.h"
-#include "logo.h"
 #include "firasans.h"
+#include "esp_adc_cal.h"
+#include <Wire.h>
+#include "logo.h"
+
+#define BATT_PIN            36
+
 
 uint8_t *framebuffer;
+int vref = 1100;
 
 void setup()
 {
     Serial.begin(115200);
 
-    // disable Core 0 WDT
-    TaskHandle_t idle_0 = xTaskGetIdleTaskHandleForCPU(0);
-    esp_task_wdt_delete(idle_0);
+    esp_adc_cal_characteristics_t adc_chars;
+    esp_adc_cal_value_t val_type = esp_adc_cal_characterize((adc_unit_t)ADC_UNIT_1, (adc_atten_t)ADC1_CHANNEL_0, (adc_bits_width_t)ADC_WIDTH_BIT_12, 1100, &adc_chars);
+    if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) {
+        Serial.printf("eFuse Vref:%u mV", adc_chars.vref);
+        vref = adc_chars.vref;
+    }
 
     epd_init();
 
-    framebuffer = (uint8_t *)heap_caps_malloc(EPD_WIDTH * EPD_HEIGHT / 2, MALLOC_CAP_SPIRAM);
+    framebuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
+    if (!framebuffer) {
+        Serial.println("alloc memory failed !!!");
+        while (1);
+    }
     memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
-}
-
-void loop()
-{
-
-    epd_poweron();
-    volatile uint32_t t1 = millis();
-    epd_clear();
-    volatile uint32_t t2 = millis();
-    printf("EPD clear took %dms.\n", t2 - t1);
-    epd_poweroff();
 
     Rect_t area = {
         .x = 230,
@@ -46,8 +45,10 @@ void loop()
         .height = logo_height,
     };
     epd_poweron();
+    epd_clear();
     epd_draw_grayscale_image(area, (uint8_t *)logo_data);
     epd_poweroff();
+
 
     int cursor_x = 200;
     int cursor_y = 300;
@@ -74,11 +75,30 @@ void loop()
     delay(500);
 
     epd_poweroff();
-    delay(1000);
-    
-    epd_poweroff_all();
 
-    esp_sleep_enable_ext1_wakeup(GPIO_SEL_39, ESP_EXT1_WAKEUP_ALL_LOW);
-    esp_deep_sleep_start();
+}
 
+void loop()
+{
+
+
+    uint16_t v = analogRead(BATT_PIN);
+    float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
+    String voltage = "➸ Voltage :" + String(battery_voltage) + "V";
+    Serial.println(voltage);
+
+    Rect_t area = {
+        .x = 200,
+        .y = 460,
+        .width = 320,
+        .height = 50,
+    };
+
+    int cursor_x = 200;
+    int cursor_y = 500;
+    epd_poweron();
+    epd_clear_area(area);
+    writeln((GFXfont *)&FiraSans, (char *)voltage.c_str(), &cursor_x, &cursor_y, NULL);
+    epd_poweroff();
+    delay(5000);
 }

@@ -15,6 +15,10 @@
 - Select the correct port and click upload
 
 
+# FAQ
+
+- IO0 has been used and cannot be programmed.
+
 
 
 

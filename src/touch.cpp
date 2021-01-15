@@ -1,3 +1,5 @@
+#ifdef ARDUINO
+
 #include "touch.h"
 
 bool TouchClass::begin(TwoWire &port, uint8_t addr)
@@ -126,29 +128,4 @@ void TouchClass::wakeup(void)
     _i2cPort->endTransmission();
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif

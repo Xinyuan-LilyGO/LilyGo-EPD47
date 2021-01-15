@@ -865,6 +865,7 @@ void IRAM_ATTR epd_draw_image(Rect_t area, uint8_t *data, enum DrawMode mode)
 
         vTaskDelete(t1);
         vTaskDelete(t2);
+        vTaskDelay(5);
     }
     vSemaphoreDelete(fetch_sem);
     vSemaphoreDelete(feed_sem);

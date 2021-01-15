@@ -1,5 +1,9 @@
 #include "rmt_pulse.h"
-#include "driver/rmt.h"
+#include <driver/rmt.h>
+#include <esp_idf_version.h>
+#if ESP_IDF_VERSION_MAJOR >= 4
+#include <hal/rmt_ll.h>
+#endif
 
 static intr_handle_t gRMT_intr_handle = NULL;
 
@@ -35,11 +39,20 @@ void rmt_pulse_init(gpio_num_t pin) {
   row_rmt_config.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
   row_rmt_config.tx_config.idle_output_en = true;
 
+#if ESP_IDF_VERSION_MAJOR >= 4
+  rmt_isr_register(rmt_interrupt_handler, 0,
+                   ESP_INTR_FLAG_LEVEL3, &gRMT_intr_handle);
+#else
   esp_intr_alloc(ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_LEVEL3,
                  rmt_interrupt_handler, 0, &gRMT_intr_handle);
+#endif
 
   rmt_config(&row_rmt_config);
+#if ESP_IDF_VERSION_MAJOR >= 4
+  rmt_ll_enable_tx_end_interrupt(&RMT, row_rmt_config.channel, true);
+#else
   rmt_set_tx_intr_en(row_rmt_config.channel, true);
+#endif
 }
 
 void IRAM_ATTR pulse_ckv_ticks(uint16_t high_time_ticks,

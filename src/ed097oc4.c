@@ -1,10 +1,13 @@
 #include "ed097oc4.h"
-#include "esp_timer.h"
+
+#include <string.h>
+
+#include <esp_timer.h>
+#include <xtensa/core-macros.h>
+
 #include "i2s_data_bus.h"
 #include "rmt_pulse.h"
 
-#include "xtensa/core-macros.h"
-#include <string.h>
 
 typedef struct {
   bool ep_latch_enable : 1;

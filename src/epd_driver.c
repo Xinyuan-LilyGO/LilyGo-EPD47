@@ -1,15 +1,20 @@
 #include "epd_driver.h"
-#include "ed097oc4.h"
-#include "esp_assert.h"
-#include "esp_heap_caps.h"
-#include "esp_log.h"
-#include "esp_types.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/queue.h"
-#include "freertos/semphr.h"
-#include "freertos/task.h"
-#include "xtensa/core-macros.h"
+
 #include <string.h>
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/queue.h>
+#include <freertos/semphr.h>
+#include <freertos/task.h>
+
+#include <esp_assert.h>
+#include <esp_heap_caps.h>
+#include <esp_log.h>
+#include <esp_types.h>
+#include <xtensa/core-macros.h>
+
+#include "ed097oc4.h"
+
 
 // number of bytes needed for one line of EPD pixel data.
 #define EPD_LINE_BYTES EPD_WIDTH / 4

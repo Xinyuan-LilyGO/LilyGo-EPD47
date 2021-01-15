@@ -1,6 +1,7 @@
 #pragma once
 
-#include "driver/gpio.h"
+#include <driver/gpio.h>
+
 
 /* Config Reggister Control */
 #define CFG_DATA GPIO_NUM_23

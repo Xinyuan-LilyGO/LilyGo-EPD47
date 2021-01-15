@@ -6,10 +6,11 @@ extern "C" {
 #endif
 
 #pragma once
-#include "esp_attr.h"
-#include <stdint.h>
-#include <stdbool.h>
 
+#include <stdbool.h>
+#include <stdint.h>
+
+#include <esp_attr.h>
 
 
 /// Width of the display area in pixels.

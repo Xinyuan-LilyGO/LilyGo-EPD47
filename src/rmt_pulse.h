@@ -3,9 +3,12 @@
  */
 
 #pragma once
-#include "driver/gpio.h"
-#include "esp_attr.h"
+
 #include <stdint.h>
+
+#include <driver/gpio.h>
+#include <esp_attr.h>
+
 
 /**
  * Initializes RMT Channel 0 with a pin for RMT pulsing.

@@ -1,4 +1,3 @@
-#include <pgmspace.h>
 #include "epd_driver.h"
 #include "ed097oc4.h"
 #include "esp_assert.h"

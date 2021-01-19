@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef ARDUINO
+#error touch.h requires the Arduino framework
+#endif
+
 #include <Arduino.h>
 #include <Wire.h>
 
@@ -34,12 +38,7 @@ private:
     uint8_t _address;
     bool initialization = false;
 
-#ifdef ARDUINO
     TwoWire *_i2cPort;
-#endif
-
-
-
 };
 
 

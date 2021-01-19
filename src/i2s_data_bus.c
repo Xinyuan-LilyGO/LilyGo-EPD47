@@ -1,10 +1,17 @@
 #include "i2s_data_bus.h"
-#include "driver/periph_ctrl.h"
-#include "esp_heap_caps.h"
-#include "rom/lldesc.h"
-#include "soc/i2s_reg.h"
-#include "soc/i2s_struct.h"
-#include "soc/rtc.h"
+
+#include <driver/periph_ctrl.h>
+#include <esp_heap_caps.h>
+#include <esp_idf_version.h>
+#if ESP_IDF_VERSION_MAJOR >= 4
+#include <esp32/rom/lldesc.h>
+#else
+#include <rom/lldesc.h>
+#endif
+#include <soc/i2s_reg.h>
+#include <soc/i2s_struct.h>
+#include <soc/rtc.h>
+
 
 /// DMA descriptors for front and back line buffer.
 /// We use two buffers, so one can be filled while the other

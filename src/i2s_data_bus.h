@@ -5,9 +5,11 @@
 
 #pragma once
 
-#include "driver/gpio.h"
-#include "esp_attr.h"
 #include <stdint.h>
+
+#include <driver/gpio.h>
+#include <esp_attr.h>
+
 
 /**
  * I2S bus configuration parameters.

@@ -22,6 +22,7 @@ void setup()
 {
     Serial.begin(115200);
 
+    // Correct the ADC reference voltage
     esp_adc_cal_characteristics_t adc_chars;
     esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
     if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) {
@@ -44,6 +45,7 @@ void setup()
         .width = logo_width,
         .height = logo_height,
     };
+
     epd_poweron();
     epd_clear();
     epd_draw_grayscale_image(area, (uint8_t *)logo_data);
@@ -80,7 +82,8 @@ void setup()
 
 void loop()
 {
-
+    // When reading the battery voltage, POWER_EN must be turned on
+    epd_poweron();
 
     uint16_t v = analogRead(BATT_PIN);
     float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
@@ -96,9 +99,18 @@ void loop()
 
     int cursor_x = 200;
     int cursor_y = 500;
-    epd_poweron();
     epd_clear_area(area);
     writeln((GFXfont *)&FiraSans, (char *)voltage.c_str(), &cursor_x, &cursor_y, NULL);
-    epd_poweroff();
+
+
+    // There are two ways to close
+
+
+    // It will turn off the power of the ink screen, but cannot turn off the blue LED light.
+    // epd_poweroff();
+
+    //It will turn off the power of the entire
+    // POWER_EN control and also turn off the blue LED light
+    epd_poweroff_all();
     delay(5000);
 }

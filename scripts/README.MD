@@ -1,3 +1,4 @@
+# fontconvert
 Prerequisite you need to install python3 and install `freetype-py` using pip
 The approximate process is like this:
 
@@ -25,3 +26,20 @@ Of course, this only demonstrates the generation of standard ascii codes. If you
 Please make sure that the unicode encoding in the fontconvert.py intervals list is included in your font file, otherwise please comment other encodings and only keep the 32,126 range!
 
 ![demo](https://user-images.githubusercontent.com/22990954/104092951-446c1880-52c2-11eb-852e-8c50626eb340.png)
+
+
+# imgconvert
+
+- Prerequisites 
+    ```
+    python3 -m pip install pillow
+    ```
+- Instructions 
+    ```
+    imgconvert.py [-h] [-i INPUTFILE] [-n NAME] [-o OUTPUTFILE]
+    ```
+    examples:
+    ```
+    python imgconvert.py -i demo.png  -n demo -o demo.h
+    ```
+

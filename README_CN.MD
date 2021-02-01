@@ -12,5 +12,5 @@
 - 工具 -> PSRAM -> Enable
 - 在Arduino IDE (文件->示例程序->LilyGoEPD47->demo) 选择示例
 - 选择正确的端口，然后点击上传
-
+- 图片与文字生成请看[脚本使用说明](./scripts/README.MD)
 

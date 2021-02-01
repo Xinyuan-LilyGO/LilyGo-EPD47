@@ -14,7 +14,7 @@
 - Tools -> PSRAM -> `Enable`
 - ("File" -> "Examples" -> "LilyGoEPD47" -> "demo") in the Arduino IDE
 - Select the correct port and click upload
-
+- Please refer to [Script Instructions](./scripts/README.MD) for picture and text generation 
 
 # FAQ
 

@@ -10,17 +10,38 @@
 #include "firasans.h"
 #include "esp_adc_cal.h"
 #include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
 #include "logo.h"
 
 #define BATT_PIN            36
-
+#define SD_MISO             12
+#define SD_MOSI             13
+#define SD_SCLK             14
+#define SD_CS               15
 
 uint8_t *framebuffer;
 int vref = 1100;
 
 void setup()
 {
+    char buf[128];
+
     Serial.begin(115200);
+
+    /*
+    * SD Card test
+    * Only as a test SdCard hardware, use example reference
+    * https://github.com/espressif/arduino-esp32/tree/master/libraries/SD/examples
+    * * */
+    SPI.begin(SD_SCLK, SD_MISO, SD_MOSI);
+    bool rlst = SD.begin(SD_CS);
+    if (!rlst) {
+        Serial.println("SD init failed");
+        snprintf(buf, 128, "➸ No detected SdCard");
+    } else {
+        snprintf(buf, 128, "➸ Detected SdCard insert:%.2f GB", SD.cardSize() / 1024.0 / 1024.0 / 1024.0);
+    }
 
     // Correct the ADC reference voltage
     esp_adc_cal_characteristics_t adc_chars;
@@ -53,7 +74,7 @@ void setup()
 
 
     int cursor_x = 200;
-    int cursor_y = 300;
+    int cursor_y = 250;
 
     char *string1 = "➸ 16 color grayscale  😀 \n";
     char *string2 = "➸ Use with 4.7\" EPDs 😍 \n";
@@ -61,6 +82,11 @@ void setup()
     char *string4 = "➸ ~630ms for full frame draw 🚀\n";
 
     epd_poweron();
+
+    writeln((GFXfont *)&FiraSans, buf, &cursor_x, &cursor_y, NULL);
+    delay(500);
+    cursor_x = 200;
+    cursor_y += 50;
     writeln((GFXfont *)&FiraSans, string1, &cursor_x, &cursor_y, NULL);
     delay(500);
     cursor_x = 200;

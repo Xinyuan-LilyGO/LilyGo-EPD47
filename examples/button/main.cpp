@@ -130,7 +130,7 @@ void setup()
     epd_draw_rect(740, 450, 120, 60, 0, framebuffer);
     cursor_x = 755;
     cursor_y = 490;
-    writeln((GFXfont *)&FiraSans, "Next", &cursor_x, &cursor_y, framebuffer);
+    writeln((GFXfont *)&FiraSans, "ultimo", &cursor_x, &cursor_y, framebuffer);
 
     Rect_t area = {
         .x = 160,

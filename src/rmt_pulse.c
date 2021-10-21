@@ -1,10 +1,10 @@
 #include "rmt_pulse.h"
 
 #include <driver/rmt.h>
-// #include <esp_idf_version.h>
-// #if ESP_IDF_VERSION_MAJOR >= 4
-// #include <hal/rmt_ll.h>
-// #endif
+ #include <esp_idf_version.h>
+ #if ESP_IDF_VERSION_MAJOR >= 4
+ #include <hal/rmt_ll.h>
+ #endif
 
 static intr_handle_t gRMT_intr_handle = NULL;
 

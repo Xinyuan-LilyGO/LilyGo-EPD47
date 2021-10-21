@@ -21,4 +21,3 @@
 - IO0 has been used and cannot be programmed.
 - How to turn off the blue LED light?
     - To turn off the blue LED, you must call `epd_poweroff_all()`, which will turn off the entire power supply controlled by PWM_EN. Note that it cannot be turned off when powered by USB. It can only be turned off when powered by battery. For details, refer to `<examples/demo>`
-- Demotion to v 1.0.6 ESP32 board package, if you are using version 2.00,[refer to](https://github.com/Xinyuan-LilyGO/LilyGo-EPD47/issues/58#issuecomment-918260372)

@@ -110,7 +110,7 @@ void loop()
 {
     // When reading the battery voltage, POWER_EN must be turned on
     epd_poweron();
-
+    delay(10); // Make adc measurement more accurate
     uint16_t v = analogRead(BATT_PIN);
     float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
     String voltage = "➸ Voltage :" + String(battery_voltage) + "V";

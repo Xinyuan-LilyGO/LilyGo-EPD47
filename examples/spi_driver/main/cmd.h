@@ -19,6 +19,7 @@
                                      be issued after MEM_BST_RD_T command) */
 #define CMD_MEM_BST_WR   0x0014 /**< Memory Burst Write Command */
 #define CMD_MEM_BST_END  0x0015 /**< End Memory Burst Cycle */
+#define CMD_CLEAR        0x0016
 #define CMD_LD_IMG       0x0020 /**< Load Full Image Command (AEG[15:0] see
                                      Register 0x200) (Write Data Number equals
                                      to full display size) */

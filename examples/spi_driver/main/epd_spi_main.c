@@ -259,6 +259,18 @@ void cmd_process(void *args)
                     cur_ptr = &data_map[0];
                     jpeg_len = 0;
                 }
+                else if (cmd.cmd == CMD_CLEAR)
+                {
+                    epd_reg.area.x = cmd.data[0] << 8 & 0xFFFF;
+                    epd_reg.area.x |= cmd.data[1] & 0xFFFF;
+                    epd_reg.area.y = cmd.data[2] << 8 & 0xFFFF;
+                    epd_reg.area.y |= cmd.data[3] & 0xFFFF;
+                    epd_reg.area.width = cmd.data[4] << 8 & 0xFFFF;
+                    epd_reg.area.width |= cmd.data[5] & 0xFFFF;
+                    epd_reg.area.height = cmd.data[6] << 8 & 0xFFFF;
+                    epd_reg.area.height |= cmd.data[7] & 0xFFFF;
+                    epd_clear_area(epd_reg.area);
+                }
             break;
 
             case E_EPD_STATUS_SLEEP:
@@ -320,6 +332,7 @@ void cmd_process(void *args)
                     jpeg_len += cmd.len;
                 }
             break;
+
 
             default:
             break;

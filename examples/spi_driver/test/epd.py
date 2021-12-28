@@ -80,6 +80,32 @@ class EPD47():
         self.width = width
         self.height = height
 
+    def clear(self, x = 0, y = 0, width = 0, height = 0):
+        payload = []
+        payload.append(0x55)
+        payload.append(0x55)
+        payload.append(0x00) # cmd
+        payload.append(0x16)
+        payload.append(0x00) # len
+        payload.append(0x08)
+        payload.append(x >> 8 & 0xFF)
+        payload.append(x & 0xFF)
+        payload.append(y >> 8 & 0xFF)
+        payload.append(y & 0xFF)
+        if width == 0:
+            payload.append(self.width >> 8 & 0xFF)
+            payload.append(self.width & 0xFF)
+        else:
+            payload.append(width >> 8 & 0xFF)
+            payload.append(width & 0xFF)
+        if height == 0:
+            payload.append(self.height >> 8 & 0xFF)
+            payload.append(self.height & 0xFF)
+        else:
+            payload.append(height >> 8 & 0xFF)
+            payload.append(height & 0xFF)
+        self.spi.writebytes(self._append_byte(payload, 4))
+
     def send_jpeg(self, filename, x = 0, y = 0, w = 0, h = 0):
         width = w
         height = h

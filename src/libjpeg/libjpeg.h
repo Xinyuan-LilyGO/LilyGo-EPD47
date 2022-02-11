@@ -40,10 +40,10 @@ extern "C" {
 /***        exported functions                                              ***/
 /******************************************************************************/
 
-void libjpeg_init(uint8_t *fb_source);
-void show_jpg_from_buff(uint8_t *buff, uint32_t buff_size);
-void show_area_jpg_from_buff(uint8_t *buff, uint32_t buff_size, Rect_t area);
-void show_jpg_from_spiffs(const char *fn);
+void libjpeg_init(void);
+void show_jpg_from_buff(uint8_t *buff, uint32_t buff_size, Rect_t area);
+// void show_jpg_from_spiffs(const char *fn);
+void libjpeg_deinit(void);
 
 #ifdef __cplusplus
 }

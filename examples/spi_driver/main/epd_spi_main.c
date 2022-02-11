@@ -316,12 +316,13 @@ void cmd_process(void *args)
                     esp_task_wdt_reset();
                     if (epd_status == E_EPD_STATUS_LD_JPEG)
                     {
-                        show_jpg_from_buff(&data_map[epd_reg.address_reg], cur_ptr - &data_map[epd_reg.address_reg]);
+                        // show_jpg_from_buff(&data_map[epd_reg.address_reg], cur_ptr - &data_map[epd_reg.address_reg]);
+                        show_jpg_from_buff(&data_map[epd_reg.address_reg], cur_ptr - &data_map[epd_reg.address_reg], epd_full_screen());
                     }
                     else
                     {
                         printf("show_area_jpg_from_buff\n");
-                        show_area_jpg_from_buff(&data_map[epd_reg.address_reg], cur_ptr - &data_map[epd_reg.address_reg], epd_reg.area);
+                        show_jpg_from_buff(&data_map[epd_reg.address_reg], cur_ptr - &data_map[epd_reg.address_reg], epd_reg.area);
                     }
                     epd_status = E_EPD_STATUS_RUN;
                 }
@@ -354,7 +355,7 @@ WORD_ALIGNED_ATTR char recvbuf[4097] = "";
 
 void main_loop(void)
 {
-    esp_err_t ret;
+    // esp_err_t ret;
     spi_slave_transaction_t t;
     memset(&t, 0, sizeof(t));
 
@@ -373,7 +374,7 @@ void main_loop(void)
         .post_setup_cb callback that is called as soon as a transaction is ready, to let the master know it is free to transfer
         data.
         */
-        ret = spi_slave_transmit(SPI2_HOST, &t, portMAX_DELAY);
+        spi_slave_transmit(SPI2_HOST, &t, portMAX_DELAY);
         printf("%lld recv byte: %d\n", esp_timer_get_time(), t.trans_len / 8);
         for (size_t i = 0; i < (t.trans_len / 8); i++)
         {
@@ -385,8 +386,6 @@ void main_loop(void)
 
 void app_main(void)
 {
-    esp_err_t ret;
-    int i = 0;
     TaskHandle_t t1;
 
     data_map = heap_caps_malloc(540 * 960, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
@@ -431,7 +430,7 @@ void app_main(void)
     ESP_ERROR_CHECK(spi_slave_initialize(SPI2_HOST, &buscfg, &slvcfg, SPI_DMA_CH_AUTO));
 
     epd_init();
-    libjpeg_init(data_map);
+    libjpeg_init();
 
     main_loop();
 }

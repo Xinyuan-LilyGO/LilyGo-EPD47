@@ -1,6 +1,5 @@
 #include "epd_driver.h"
-
-#include <string.h>
+#include "ed047tc1.h"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
@@ -13,8 +12,7 @@
 #include <esp_types.h>
 #include <xtensa/core-macros.h>
 
-#include "ed047tc1.h"
-
+#include <string.h>
 
 // number of bytes needed for one line of EPD pixel data.
 #define EPD_LINE_BYTES EPD_WIDTH / 4
@@ -25,21 +23,18 @@ uint32_t skipping;
 #define CLEAR_BYTE 0B10101010
 #define DARK_BYTE 0B01010101
 
-
 /* 4bpp Contrast cycles in order of contrast (Darkest first).  */
-const int contrast_cycles_4[15] = {30, 30, 20, 20, 30,  30,  30, 40, 40, 50, 50, 50, 100, 200, 300};
+const int contrast_cycles_4[15] = {30, 30, 20, 20, 30, 30, 30, 40, 40, 50, 50, 50, 100, 200, 300};
 
-const int contrast_cycles_4_white[15] = {10, 10, 8, 8, 8,  8,  8, 10, 10, 15, 15, 20, 20, 100, 300};
-
-
+const int contrast_cycles_4_white[15] = {10, 10, 8, 8, 8, 8, 8, 10, 10, 15, 15, 20, 20, 100, 300};
 
 #ifndef _swap_int
-#define _swap_int(a, b)                                                    \
-  {                                                                            \
-    int t = a;                                                             \
-    a = b;                                                                     \
-    b = t;                                                                     \
-  }
+#define _swap_int(a, b) \
+    {                   \
+        int t = a;      \
+        a = b;          \
+        b = t;          \
+    }
 #endif
 
 // Heap space to use for the EPD output lookup table, which
@@ -51,8 +46,9 @@ static QueueHandle_t output_queue;
 static void write_row(uint32_t output_time_dus)
 {
     // avoid too light output after skipping on some displays
-    if (skipping) {
-        //vTaskDelay(20);
+    if (skipping)
+    {
+        // vTaskDelay(20);
     }
     skipping = 0;
     epd_output_row(output_time_dus);
@@ -74,7 +70,8 @@ void epd_init()
 void skip_row(uint8_t pipeline_finish_time)
 {
     // output previously loaded row, fill buffer with no-ops.
-    if (skipping == 0) {
+    if (skipping == 0)
+    {
         epd_switch_buffer();
         memset(epd_get_current_buffer(), 0, EPD_LINE_BYTES);
         epd_switch_buffer();
@@ -82,16 +79,20 @@ void skip_row(uint8_t pipeline_finish_time)
         epd_output_row(pipeline_finish_time);
         // avoid tainting of following rows by
         // allowing residual charge to dissipate
-        //vTaskDelay(10);
+        // vTaskDelay(10);
         /*
         unsigned counts = XTHAL_GET_CCOUNT() + 50 * 240;
         while (XTHAL_GET_CCOUNT() < counts) {
         };
         */
-    } else if (skipping < 2) {
+    }
+    else if (skipping < 2)
+    {
         epd_output_row(10);
-    } else {
-        //epd_output_row(5);
+    }
+    else
+    {
+        // epd_output_row(5);
         epd_skip();
     }
     skipping++;
@@ -102,22 +103,26 @@ void epd_push_pixels(Rect_t area, short time, int color)
 
     uint8_t row[EPD_LINE_BYTES] = {0};
 
-    for (uint32_t i = 0; i < area.width; i++) {
+    for (uint32_t i = 0; i < area.width; i++)
+    {
         uint32_t position = i + area.x % 4;
-        uint8_t mask =
-            (color ? CLEAR_BYTE : DARK_BYTE) & (0b00000011 << (2 * (position % 4)));
+        uint8_t mask = (color ? CLEAR_BYTE : DARK_BYTE) & (0b00000011 << (2 * (position % 4)));
         row[area.x / 4 + position / 4] |= mask;
     }
     reorder_line_buffer((uint32_t *)row);
 
     epd_start_frame();
 
-    for (int i = 0; i < EPD_HEIGHT; i++) {
+    for (int i = 0; i < EPD_HEIGHT; i++)
+    {
         // before are of interest: skip
-        if (i < area.y) {
+        if (i < area.y)
+        {
             skip_row(time);
             // start area of interest: set row data
-        } else if (i == area.y) {
+        }
+        else if (i == area.y)
+        {
             epd_switch_buffer();
             memcpy(epd_get_current_buffer(), row, EPD_LINE_BYTES);
             epd_switch_buffer();
@@ -125,10 +130,14 @@ void epd_push_pixels(Rect_t area, short time, int color)
 
             write_row(time * 10);
             // load nop row if done with area
-        } else if (i >= area.y + area.height) {
+        }
+        else if (i >= area.y + area.height)
+        {
             skip_row(time);
             // output the same as before
-        } else {
+        }
+        else
+        {
             write_row(time * 10);
         }
     }
@@ -148,11 +157,14 @@ void epd_clear_area_cycles(Rect_t area, int cycles, int cycle_time)
     const short white_time = cycle_time;
     const short dark_time = cycle_time;
 
-    for (int c = 0; c < cycles; c++) {
-        for (int i = 0; i < 4; i++) {
+    for (int c = 0; c < cycles; c++)
+    {
+        for (int i = 0; i < 4; i++)
+        {
             epd_push_pixels(area, dark_time, 0);
         }
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++)
+        {
             epd_push_pixels(area, white_time, 1);
         }
     }
@@ -174,7 +186,8 @@ void epd_clear()
  */
 void reorder_line_buffer(uint32_t *line_data)
 {
-    for (uint32_t i = 0; i < EPD_LINE_BYTES / 4; i++) {
+    for (uint32_t i = 0; i < EPD_LINE_BYTES / 4; i++)
+    {
         uint32_t val = *line_data;
         *(line_data++) = val >> 16 | ((val & 0x0000FFFF) << 16);
     }
@@ -189,14 +202,16 @@ void IRAM_ATTR calc_epd_input_4bpp(uint32_t *line_data, uint8_t *epd_input,
 
     // this is reversed for little-endian, but this is later compensated
     // through the output peripheral.
-    for (uint32_t j = 0; j < EPD_WIDTH / 16; j++) {
-
+    for (uint32_t j = 0; j < EPD_WIDTH / 16; j++)
+    {
         uint16_t v1 = *(line_data_16++);
         uint16_t v2 = *(line_data_16++);
         uint16_t v3 = *(line_data_16++);
         uint16_t v4 = *(line_data_16++);
-        uint32_t pixel = conversion_lut[v1] << 16 | conversion_lut[v2] << 24 |
-                         conversion_lut[v3] | conversion_lut[v4] << 8;
+        uint32_t pixel = conversion_lut[v1] << 16 |
+                         conversion_lut[v2] << 24 |
+                         conversion_lut[v3] |
+                         conversion_lut[v4] << 8;
         wide_epd_input[j] = pixel;
     }
 }
@@ -230,18 +245,17 @@ const DRAM_ATTR uint32_t lut_1bpp[256] = {
     0x5401, 0x5404, 0x5405, 0x5410, 0x5411, 0x5414, 0x5415, 0x5440, 0x5441,
     0x5444, 0x5445, 0x5450, 0x5451, 0x5454, 0x5455, 0x5500, 0x5501, 0x5504,
     0x5505, 0x5510, 0x5511, 0x5514, 0x5515, 0x5540, 0x5541, 0x5544, 0x5545,
-    0x5550, 0x5551, 0x5554, 0x5555
-};
+    0x5550, 0x5551, 0x5554, 0x5555};
 
 void IRAM_ATTR calc_epd_input_1bpp(uint8_t *line_data, uint8_t *epd_input,
                                    enum DrawMode mode)
 {
-
     uint32_t *wide_epd_input = (uint32_t *)epd_input;
 
     // this is reversed for little-endian, but this is later compensated
     // through the output peripheral.
-    for (uint32_t j = 0; j < EPD_WIDTH / 16; j++) {
+    for (uint32_t j = 0; j < EPD_WIDTH / 16; j++)
+    {
         uint8_t v1 = *(line_data++);
         uint8_t v2 = *(line_data++);
         wide_epd_input[j] = (lut_1bpp[v1] << 16) | lut_1bpp[v2];
@@ -250,7 +264,8 @@ void IRAM_ATTR calc_epd_input_1bpp(uint8_t *line_data, uint8_t *epd_input,
 
 static void IRAM_ATTR reset_lut(uint8_t *lut_mem, enum DrawMode mode)
 {
-    switch (mode) {
+    switch (mode)
+    {
     case BLACK_ON_WHITE:
         memset(lut_mem, 0x55, (1 << 16));
         break;
@@ -264,30 +279,36 @@ static void IRAM_ATTR reset_lut(uint8_t *lut_mem, enum DrawMode mode)
     }
 }
 
-static void IRAM_ATTR update_LUT(uint8_t *lut_mem, uint8_t k,
-                                 enum DrawMode mode)
+static void IRAM_ATTR update_LUT(uint8_t *lut_mem, uint8_t k, enum DrawMode mode)
 {
-    if (mode == BLACK_ON_WHITE || mode == WHITE_ON_WHITE) {
+    if (mode == BLACK_ON_WHITE || mode == WHITE_ON_WHITE)
+    {
         k = 15 - k;
     }
 
     // reset the pixels which are not to be lightened / darkened
     // any longer in the current frame
-    for (uint32_t l = k; l < (1 << 16); l += 16) {
+    for (uint32_t l = k; l < (1 << 16); l += 16)
+    {
         lut_mem[l] &= 0xFC;
     }
 
-    for (uint32_t l = (k << 4); l < (1 << 16); l += (1 << 8)) {
-        for (uint32_t p = 0; p < 16; p++) {
+    for (uint32_t l = (k << 4); l < (1 << 16); l += (1 << 8))
+    {
+        for (uint32_t p = 0; p < 16; p++)
+        {
             lut_mem[l + p] &= 0xF3;
         }
     }
-    for (uint32_t l = (k << 8); l < (1 << 16); l += (1 << 12)) {
-        for (uint32_t p = 0; p < (1 << 8); p++) {
+    for (uint32_t l = (k << 8); l < (1 << 16); l += (1 << 12))
+    {
+        for (uint32_t p = 0; p < (1 << 8); p++)
+        {
             lut_mem[l + p] &= 0xCF;
         }
     }
-    for (uint32_t p = (k << 12); p < ((k + 1) << 12); p++) {
+    for (uint32_t p = (k << 12); p < ((k + 1) << 12); p++)
+    {
         lut_mem[p] &= 0x3F;
     }
 }
@@ -295,7 +316,8 @@ static void IRAM_ATTR update_LUT(uint8_t *lut_mem, uint8_t k,
 void IRAM_ATTR nibble_shift_buffer_right(uint8_t *buf, uint32_t len)
 {
     uint8_t carry = 0xF;
-    for (uint32_t i = 0; i < len; i++) {
+    for (uint32_t i = 0; i < len; i++)
+    {
         uint8_t val = buf[i];
         buf[i] = (val << 4) | carry;
         carry = (val & 0xF0) >> 4;
@@ -308,7 +330,8 @@ void IRAM_ATTR nibble_shift_buffer_right(uint8_t *buf, uint32_t len)
 void IRAM_ATTR bit_shift_buffer_right(uint8_t *buf, uint32_t len, int shift)
 {
     uint8_t carry = 0x00;
-    for (uint32_t i = 0; i < len; i++) {
+    for (uint32_t i = 0; i < len; i++)
+    {
         uint8_t val = buf[i];
         buf[i] = (val << shift) | carry;
         carry = val >> (8 - shift);
@@ -320,43 +343,46 @@ inline uint32_t min(uint32_t x, uint32_t y)
     return x < y ? x : y;
 }
 
-void epd_draw_hline(int x, int y, int length, uint8_t color,
-                    uint8_t *framebuffer)
+void epd_draw_hline(int x, int y, int length, uint8_t color, uint8_t *framebuffer)
 {
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++)
+    {
         int xx = x + i;
         epd_draw_pixel(xx, y, color, framebuffer);
     }
 }
 
-void epd_draw_vline(int x, int y, int length, uint8_t color,
-                    uint8_t *framebuffer)
+void epd_draw_vline(int x, int y, int length, uint8_t color, uint8_t *framebuffer)
 {
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++)
+    {
         int yy = y + i;
         epd_draw_pixel(x, yy, color, framebuffer);
     }
 }
 
-void epd_draw_pixel(int x, int y, uint8_t color,
-                    uint8_t *framebuffer)
+void epd_draw_pixel(int x, int y, uint8_t color, uint8_t *framebuffer)
 {
-    if (x < 0 || x >= EPD_WIDTH) {
+    if (x < 0 || x >= EPD_WIDTH)
+    {
         return;
     }
-    if (y < 0 || y >= EPD_HEIGHT) {
+    if (y < 0 || y >= EPD_HEIGHT)
+    {
         return;
     }
     uint8_t *buf_ptr = &framebuffer[y * EPD_WIDTH / 2 + x / 2];
-    if (x % 2) {
+    if (x % 2)
+    {
         *buf_ptr = (*buf_ptr & 0x0F) | (color & 0xF0);
-    } else {
+    }
+    else
+    {
         *buf_ptr = (*buf_ptr & 0xF0) | (color >> 4);
     }
 }
 
-void epd_draw_circle(int x0, int y0, int r, uint8_t color,
-                     uint8_t *framebuffer)
+void epd_draw_circle(int x0, int y0, int r, uint8_t color, uint8_t *framebuffer)
 {
     int f = 1 - r;
     int ddF_x = 1;
@@ -369,8 +395,10 @@ void epd_draw_circle(int x0, int y0, int r, uint8_t color,
     epd_draw_pixel(x0 + r, y0, color, framebuffer);
     epd_draw_pixel(x0 - r, y0, color, framebuffer);
 
-    while (x < y) {
-        if (f >= 0) {
+    while (x < y)
+    {
+        if (f >= 0)
+        {
             y--;
             ddF_y += 2;
             f += ddF_y;
@@ -390,20 +418,15 @@ void epd_draw_circle(int x0, int y0, int r, uint8_t color,
     }
 }
 
-void epd_fill_circle(int x0, int y0, int r, uint8_t color,
-                     uint8_t *framebuffer)
+void epd_fill_circle(int x0, int y0, int r, uint8_t color, uint8_t *framebuffer)
 {
     epd_draw_vline(x0, y0 - r, 2 * r + 1, color, framebuffer);
     epd_fill_circle_helper(x0, y0, r, 3, 0, color, framebuffer);
 }
 
-
-void epd_fill_circle_helper(int x0, int y0, int r,
-                            int corners, int delta,
-                            uint8_t color,
-                            uint8_t *framebuffer)
+void epd_fill_circle_helper(int x0, int y0, int r, int corners, int delta,
+                            uint8_t color, uint8_t *framebuffer)
 {
-
     int f = 1 - r;
     int ddF_x = 1;
     int ddF_y = -2 * r;
@@ -414,8 +437,10 @@ void epd_fill_circle_helper(int x0, int y0, int r,
 
     delta++; // Avoid some +1's in the loop
 
-    while (x < y) {
-        if (f >= 0) {
+    while (x < y)
+    {
+        if (f >= 0)
+        {
             y--;
             ddF_y += 2;
             f += ddF_y;
@@ -425,13 +450,15 @@ void epd_fill_circle_helper(int x0, int y0, int r,
         f += ddF_x;
         // These checks avoid double-drawing certain lines, important
         // for the SSD1306 library which has an INVERT drawing mode.
-        if (x < (y + 1)) {
+        if (x < (y + 1))
+        {
             if (corners & 1)
                 epd_draw_vline(x0 + x, y0 - y, 2 * y + delta, color, framebuffer);
             if (corners & 2)
                 epd_draw_vline(x0 - x, y0 - y, 2 * y + delta, color, framebuffer);
         }
-        if (y != py) {
+        if (y != py)
+        {
             if (corners & 1)
                 epd_draw_vline(x0 + py, y0 - px, 2 * px + delta, color, framebuffer);
             if (corners & 2)
@@ -442,8 +469,7 @@ void epd_fill_circle_helper(int x0, int y0, int r,
     }
 }
 
-void epd_draw_rect(int x, int y, int w, int h,
-                   uint8_t color, uint8_t *framebuffer)
+void epd_draw_rect(int x, int y, int w, int h, uint8_t color, uint8_t *framebuffer)
 {
     epd_draw_hline(x, y, w, color, framebuffer);
     epd_draw_hline(x, y + h - 1, w, color, framebuffer);
@@ -451,24 +477,25 @@ void epd_draw_rect(int x, int y, int w, int h,
     epd_draw_vline(x + w - 1, y, h, color, framebuffer);
 }
 
-void epd_fill_rect(int x, int y, int w, int h,
-                   uint8_t color, uint8_t *framebuffer)
+void epd_fill_rect(int x, int y, int w, int h, uint8_t color, uint8_t *framebuffer)
 {
-    for (int i = x; i < x + w; i++) {
+    for (int i = x; i < x + w; i++)
+    {
         epd_draw_vline(i, y, h, color, framebuffer);
     }
 }
 
-void epd_write_line(int x0, int y0, int x1, int y1,
-                    uint8_t color, uint8_t *framebuffer)
+void epd_write_line(int x0, int y0, int x1, int y1, uint8_t color, uint8_t *framebuffer)
 {
     int steep = abs(y1 - y0) > abs(x1 - x0);
-    if (steep) {
+    if (steep)
+    {
         _swap_int(x0, y0);
         _swap_int(x1, y1);
     }
 
-    if (x0 > x1) {
+    if (x0 > x1)
+    {
         _swap_int(x0, x1);
         _swap_int(y0, y1);
     }
@@ -480,74 +507,87 @@ void epd_write_line(int x0, int y0, int x1, int y1,
     int err = dx / 2;
     int ystep;
 
-    if (y0 < y1) {
+    if (y0 < y1)
+    {
         ystep = 1;
-    } else {
+    }
+    else
+    {
         ystep = -1;
     }
 
-    for (; x0 <= x1; x0++) {
-        if (steep) {
+    for (; x0 <= x1; x0++)
+    {
+        if (steep)
+        {
             epd_draw_pixel(y0, x0, color, framebuffer);
-        } else {
+        }
+        else
+        {
             epd_draw_pixel(x0, y0, color, framebuffer);
         }
         err -= dy;
-        if (err < 0) {
+        if (err < 0)
+        {
             y0 += ystep;
             err += dx;
         }
     }
 }
 
-void epd_draw_line(int x0, int y0, int x1, int y1,
-                   uint8_t color, uint8_t *framebuffer)
+void epd_draw_line(int x0, int y0, int x1, int y1, uint8_t color, uint8_t *framebuffer)
 {
     // Update in subclasses if desired!
-    if (x0 == x1) {
+    if (x0 == x1)
+    {
         if (y0 > y1)
             _swap_int(y0, y1);
         epd_draw_vline(x0, y0, y1 - y0 + 1, color, framebuffer);
-    } else if (y0 == y1) {
+    }
+    else if (y0 == y1)
+    {
         if (x0 > x1)
             _swap_int(x0, x1);
         epd_draw_hline(x0, y0, x1 - x0 + 1, color, framebuffer);
-    } else {
+    }
+    else
+    {
         epd_write_line(x0, y0, x1, y1, color, framebuffer);
     }
 }
 
-void epd_draw_triangle(int x0, int y0, int x1, int y1,
-                       int x2, int y2, uint8_t color,
-                       uint8_t *framebuffer)
+void epd_draw_triangle(int x0, int y0, int x1, int y1, int x2, int y2, 
+                       uint8_t color, uint8_t *framebuffer)
 {
     epd_draw_line(x0, y0, x1, y1, color, framebuffer);
     epd_draw_line(x1, y1, x2, y2, color, framebuffer);
     epd_draw_line(x2, y2, x0, y0, color, framebuffer);
 }
 
-void epd_fill_triangle(int x0, int y0, int x1, int y1,
-                       int x2, int y2, uint8_t color,
-                       uint8_t *framebuffer)
+void epd_fill_triangle(int x0, int y0, int x1, int y1, int x2, int y2, 
+                       uint8_t color, uint8_t *framebuffer)
 {
-
     int a, b, y, last;
 
     // Sort coordinates by Y order (y2 >= y1 >= y0)
-    if (y0 > y1) {
+    if (y0 > y1)
+    {
         _swap_int(y0, y1);
         _swap_int(x0, x1);
     }
-    if (y1 > y2) {
+    if (y1 > y2)
+    {
         _swap_int(y2, y1);
         _swap_int(x2, x1);
     }
-    if (y0 > y1) {
+    if (y0 > y1)
+    {
         _swap_int(y0, y1);
         _swap_int(x0, x1);
     }
 
-    if (y0 == y2) { // Handle awkward all-on-same-line case as its own thing
+    if (y0 == y2)
+    { // Handle awkward all-on-same-line case as its own thing
         a = b = x0;
         if (x1 < a)
             a = x1;
@@ -576,7 +616,8 @@ void epd_fill_triangle(int x0, int y0, int x1, int y1,
     else
         last = y1 - 1; // Skip it
 
-    for (y = y0; y <= last; y++) {
+    for (y = y0; y <= last; y++)
+    {
         a = x0 + sa / dy01;
         b = x0 + sb / dy02;
         sa += dx01;
@@ -594,7 +635,8 @@ void epd_fill_triangle(int x0, int y0, int x1, int y1,
     // 0-2 and 1-2.  This loop is skipped if y1=y2.
     sa = (int32_t)dx12 * (y - y1);
     sb = (int32_t)dx02 * (y - y0);
-    for (; y <= y2; y++) {
+    for (; y <= y2; y++)
+    {
         a = x1 + sa / dy12;
         b = x0 + sb / dy02;
         sa += dx12;
@@ -612,32 +654,37 @@ void epd_fill_triangle(int x0, int y0, int x1, int y1,
 void epd_copy_to_framebuffer(Rect_t image_area, uint8_t *image_data,
                              uint8_t *framebuffer)
 {
-
     assert(framebuffer != NULL);
 
-    for (uint32_t i = 0; i < image_area.width * image_area.height; i++) {
-
+    for (uint32_t i = 0; i < image_area.width * image_area.height; i++)
+    {
         uint32_t value_index = i;
         // for images of uneven width,
         // consume an additional nibble per row.
-        if (image_area.width % 2) {
+        if (image_area.width % 2)
+        {
             value_index += i / image_area.width;
         }
         uint8_t val = (value_index % 2) ? (image_data[value_index / 2] & 0xF0) >> 4
-                      : image_data[value_index / 2] & 0x0F;
+                                        : image_data[value_index / 2] & 0x0F;
 
         int xx = image_area.x + i % image_area.width;
-        if (xx < 0 || xx >= EPD_WIDTH) {
+        if (xx < 0 || xx >= EPD_WIDTH)
+        {
             continue;
         }
         int yy = image_area.y + i / image_area.width;
-        if (yy < 0 || yy >= EPD_HEIGHT) {
+        if (yy < 0 || yy >= EPD_HEIGHT)
+        {
             continue;
         }
         uint8_t *buf_ptr = &framebuffer[yy * EPD_WIDTH / 2 + xx / 2];
-        if (xx % 2) {
+        if (xx % 2)
+        {
             *buf_ptr = (*buf_ptr & 0x0F) | (val << 4);
-        } else {
+        }
+        else
+        {
             *buf_ptr = (*buf_ptr & 0xF0) | val;
         }
     }
@@ -648,7 +695,8 @@ void IRAM_ATTR epd_draw_grayscale_image(Rect_t area, uint8_t *data)
     epd_draw_image(area, data, BLACK_ON_WHITE);
 }
 
-typedef struct {
+typedef struct
+{
     uint8_t *data_ptr;
     SemaphoreHandle_t done_smphr;
     Rect_t area;
@@ -663,35 +711,46 @@ void IRAM_ATTR provide_out(OutputParams *params)
     Rect_t area = params->area;
     uint8_t *ptr = params->data_ptr;
 
-    if (params->frame == 0) {
+    if (params->frame == 0)
+    {
         reset_lut(conversion_lut, params->mode);
     }
 
     update_LUT(conversion_lut, params->frame, params->mode);
 
-    if (area.x < 0) {
+    if (area.x < 0)
+    {
         ptr += -area.x / 2;
     }
-    if (area.y < 0) {
+    if (area.y < 0)
+    {
         ptr += (area.width / 2 + area.width % 2) * -area.y;
     }
 
-    for (int i = 0; i < EPD_HEIGHT; i++) {
-        if (i < area.y || i >= area.y + area.height) {
+    for (int i = 0; i < EPD_HEIGHT; i++)
+    {
+        if (i < area.y || i >= area.y + area.height)
+        {
             continue;
         }
 
         uint32_t *lp;
         bool shifted = false;
-        if (area.width == EPD_WIDTH && area.x == 0) {
+        if (area.width == EPD_WIDTH && area.x == 0)
+        {
             lp = (uint32_t *)ptr;
             ptr += EPD_WIDTH / 2;
-        } else {
+        }
+        else
+        {
             uint8_t *buf_start = (uint8_t *)line;
             uint32_t line_bytes = area.width / 2 + area.width % 2;
-            if (area.x >= 0) {
+            if (area.x >= 0)
+            {
                 buf_start += area.x / 2;
-            } else {
+            }
+            else
+            {
                 // reduce line_bytes to actually used bytes
                 line_bytes += area.x / 2;
             }
@@ -701,20 +760,23 @@ void IRAM_ATTR provide_out(OutputParams *params)
             ptr += area.width / 2 + area.width % 2;
 
             // mask last nibble for uneven width
-            if (area.width % 2 == 1 && area.x / 2 + area.width / 2 + 1 < EPD_WIDTH) {
+            if (area.width % 2 == 1 && area.x / 2 + area.width / 2 + 1 < EPD_WIDTH)
+            {
                 *(buf_start + line_bytes - 1) |= 0xF0;
             }
-            if (area.x % 2 == 1 && area.x < EPD_WIDTH) {
+            if (area.x % 2 == 1 && area.x < EPD_WIDTH)
+            {
                 shifted = true;
                 // shift one nibble to right
                 nibble_shift_buffer_right(
                     buf_start, min(line_bytes + 1, (uint32_t)line + EPD_WIDTH / 2 -
-                                   (uint32_t)buf_start));
+                                                       (uint32_t)buf_start));
             }
             lp = (uint32_t *)line;
         }
         xQueueSendToBack(output_queue, lp, portMAX_DELAY);
-        if (shifted) {
+        if (shifted)
+        {
             memset(line, 255, EPD_WIDTH / 2);
         }
     }
@@ -727,7 +789,8 @@ void IRAM_ATTR feed_display(OutputParams *params)
 {
     Rect_t area = params->area;
     const int *contrast_lut = contrast_cycles_4;
-    switch (params->mode) {
+    switch (params->mode)
+    {
     case WHITE_ON_WHITE:
     case BLACK_ON_WHITE:
         contrast_lut = contrast_cycles_4;
@@ -738,8 +801,10 @@ void IRAM_ATTR feed_display(OutputParams *params)
     }
 
     epd_start_frame();
-    for (int i = 0; i < EPD_HEIGHT; i++) {
-        if (i < area.y || i >= area.y + area.height) {
+    for (int i = 0; i < EPD_HEIGHT; i++)
+    {
+        if (i < area.y || i >= area.y + area.height)
+        {
             skip_row(contrast_lut[params->frame]);
             continue;
         }
@@ -749,7 +814,8 @@ void IRAM_ATTR feed_display(OutputParams *params)
                             params->frame, conversion_lut);
         write_row(contrast_lut[params->frame]);
     }
-    if (!skipping) {
+    if (!skipping)
+    {
         // Since we "pipeline" row output, we still have to latch out the last row.
         write_row(contrast_lut[params->frame]);
     }
@@ -762,37 +828,46 @@ void IRAM_ATTR feed_display(OutputParams *params)
 void IRAM_ATTR epd_draw_frame_1bit(Rect_t area, uint8_t *ptr,
                                    enum DrawMode mode, int time)
 {
-
     epd_start_frame();
     uint8_t line[EPD_WIDTH / 8];
     memset(line, 0, sizeof(line));
 
-    if (area.x < 0) {
+    if (area.x < 0)
+    {
         ptr += -area.x / 8;
     }
 
     int ceil_byte_width = (area.width / 8 + (area.width % 8 > 0));
-    if (area.y < 0) {
+    if (area.y < 0)
+    {
         ptr += ceil_byte_width * -area.y;
     }
 
-    for (int i = 0; i < EPD_HEIGHT; i++) {
-        if (i < area.y || i >= area.y + area.height) {
+    for (int i = 0; i < EPD_HEIGHT; i++)
+    {
+        if (i < area.y || i >= area.y + area.height)
+        {
             skip_row(time);
             continue;
         }
 
         uint8_t *lp;
         bool shifted = 0;
-        if (area.width == EPD_WIDTH && area.x == 0) {
+        if (area.width == EPD_WIDTH && area.x == 0)
+        {
             lp = ptr;
             ptr += EPD_WIDTH / 8;
-        } else {
+        }
+        else
+        {
             uint8_t *buf_start = (uint8_t *)line;
             uint32_t line_bytes = ceil_byte_width;
-            if (area.x >= 0) {
+            if (area.x >= 0)
+            {
                 buf_start += area.x / 8;
-            } else {
+            }
+            else
+            {
                 // reduce line_bytes to actually used bytes
                 line_bytes += area.x / 8;
             }
@@ -802,15 +877,18 @@ void IRAM_ATTR epd_draw_frame_1bit(Rect_t area, uint8_t *ptr,
             ptr += ceil_byte_width;
 
             // mask last n bits if width is not divisible by 8
-            if (area.width % 8 != 0 && ceil_byte_width + 1 < EPD_WIDTH) {
+            if (area.width % 8 != 0 && ceil_byte_width + 1 < EPD_WIDTH)
+            {
                 uint8_t mask = 0;
-                for (int s = 0; s < area.width % 8; s++) {
+                for (int s = 0; s < area.width % 8; s++)
+                {
                     mask = (mask << 1) | 1;
                 }
                 *(buf_start + line_bytes - 1) &= mask;
             }
 
-            if (area.x % 8 != 0 && area.x < EPD_WIDTH) {
+            if (area.x % 8 != 0 && area.x < EPD_WIDTH)
+            {
                 // shift to right
                 shifted = true;
                 bit_shift_buffer_right(
@@ -823,11 +901,13 @@ void IRAM_ATTR epd_draw_frame_1bit(Rect_t area, uint8_t *ptr,
         }
         calc_epd_input_1bpp(lp, epd_get_current_buffer(), mode);
         epd_output_row(time);
-        if (shifted) {
+        if (shifted)
+        {
             memset(line, 0, sizeof(line));
         }
     }
-    if (!skipping) {
+    if (!skipping)
+    {
         epd_output_row(time);
     }
     epd_end_frame();
@@ -842,7 +922,8 @@ void IRAM_ATTR epd_draw_image(Rect_t area, uint8_t *data, enum DrawMode mode)
     SemaphoreHandle_t fetch_sem = xSemaphoreCreateBinary();
     SemaphoreHandle_t feed_sem = xSemaphoreCreateBinary();
     vTaskDelay(10);
-    for (uint8_t k = 0; k < frame_count; k++) {
+    for (uint8_t k = 0; k < frame_count; k++)
+    {
         OutputParams p1 = {
             .area = area,
             .data_ptr = data,

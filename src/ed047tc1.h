@@ -1,7 +1,12 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <driver/gpio.h>
 
+#include <stdint.h>
 
 /* Config Reggister Control */
 #define CFG_DATA GPIO_NUM_23
@@ -69,3 +74,7 @@ uint8_t IRAM_ATTR *epd_get_current_buffer();
  * this function blocks until transmission is done.
  */
 void IRAM_ATTR epd_switch_buffer();
+
+#ifdef __cplusplus
+}
+#endif

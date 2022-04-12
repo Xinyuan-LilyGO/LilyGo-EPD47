@@ -15,11 +15,11 @@
 #include <soc/i2s_struct.h>
 #include <soc/rtc.h>
 
-
 /// DMA descriptors for front and back line buffer.
 /// We use two buffers, so one can be filled while the other
 /// is transmitted.
-typedef struct {
+typedef struct
+{
     volatile lldesc_t *dma_desc_a;
     volatile lldesc_t *dma_desc_b;
 
@@ -38,6 +38,7 @@ static intr_handle_t gI2S_intr_handle = NULL;
 
 /// Indicates the device has finished its transmission and is ready again.
 static volatile bool output_done = true;
+
 /// The start pulse pin extracted from the configuration for use in the "done"
 /// interrupt.
 static gpio_num_t start_pulse_pin;
@@ -60,16 +61,15 @@ static void fill_dma_desc(volatile lldesc_t *dmadesc, uint8_t *buf,
 /// which uses only the lower 20bits (according to TRM)
 uint32_t dma_desc_addr()
 {
-    return (uint32_t)(current_buffer ? i2s_state.dma_desc_a
-                      : i2s_state.dma_desc_b) &
-           0x000FFFFF;
+    return (uint32_t)(current_buffer ? i2s_state.dma_desc_a : i2s_state.dma_desc_b) & \
+                     0x000FFFFF;
 }
 
 /// Set up a GPIO as output and route it to a signal.
 static void gpio_setup_out(int gpio, int sig, bool invert)
 {
-    if (gpio == -1)
-        return;
+    if (gpio == -1) return ;
+
     PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[gpio], PIN_FUNC_GPIO);
     gpio_set_direction(gpio, GPIO_MODE_DEF_OUTPUT);
     gpio_matrix_out(gpio, sig, invert, false);
@@ -79,7 +79,8 @@ static void gpio_setup_out(int gpio, int sig, bool invert)
 static void IRAM_ATTR i2s_int_hdl(void *arg)
 {
     i2s_dev_t *dev = &I2S1;
-    if (dev->int_st.out_done) {
+    if (dev->int_st.out_done)
+    {
         gpio_set_level(start_pulse_pin, 1);
         output_done = true;
     }
@@ -89,7 +90,8 @@ static void IRAM_ATTR i2s_int_hdl(void *arg)
 
 volatile uint8_t IRAM_ATTR *i2s_get_current_buffer()
 {
-    return current_buffer ? i2s_state.dma_desc_a->buf : i2s_state.dma_desc_b->buf;
+    return current_buffer ? i2s_state.dma_desc_a->buf
+                          : i2s_state.dma_desc_b->buf;
 }
 
 bool IRAM_ATTR i2s_is_busy()
@@ -102,8 +104,7 @@ void IRAM_ATTR i2s_switch_buffer()
 {
     // either device is done transmitting or the switch must be away from the
     // buffer currently used by the DMA engine.
-    while (i2s_is_busy() && dma_desc_addr() != I2S1.out_link.addr) {
-    };
+    while (i2s_is_busy() && dma_desc_addr() != I2S1.out_link.addr) ;
     current_buffer = !current_buffer;
 }
 
@@ -132,8 +133,7 @@ void i2s_bus_init(i2s_bus_config *cfg)
     // TODO: Why?
     gpio_num_t I2S_GPIO_BUS[] = {cfg->data_6, cfg->data_7, cfg->data_4,
                                  cfg->data_5, cfg->data_2, cfg->data_3,
-                                 cfg->data_0, cfg->data_1
-                                };
+                                 cfg->data_0, cfg->data_1};
 
     gpio_set_direction(cfg->start_pulse, GPIO_MODE_OUTPUT);
     gpio_set_level(cfg->start_pulse, 1);
@@ -145,7 +145,8 @@ void i2s_bus_init(i2s_bus_config *cfg)
     int signal_base = I2S1O_DATA_OUT0_IDX;
 
     // Setup and route GPIOS
-    for (int x = 0; x < 8; x++) {
+    for (int x = 0; x < 8; x++)
+    {
         gpio_setup_out(I2S_GPIO_BUS[x], signal_base + x, false);
     }
     // Invert word select signal
@@ -182,14 +183,13 @@ void i2s_bus_init(i2s_bus_config *cfg)
     // (Smallest possible divider according to the spec).
     dev->sample_rate_conf.tx_bck_div_num = 2;
 
-//#if defined(CONFIG_EPD_DISPLAY_TYPE_ED097OC4_LQ)
+    //#if defined(CONFIG_EPD_DISPLAY_TYPE_ED097OC4_LQ)
     // Initialize Audio Clock (APLL) for 120 Mhz.
     rtc_clk_apll_enable(1, 0, 0, 8, 0);
-//#else
+    //#else
     // Initialize Audio Clock (APLL) for 80 Mhz.
-// rtc_clk_apll_enable(1, 0, 0, 8, 1);
-//#endif
-
+    // rtc_clk_apll_enable(1, 0, 0, 8, 1);
+    //#endif
 
     // Set Audio Clock Dividers
     dev->clkm_conf.val = 0;
@@ -251,8 +251,7 @@ void i2s_bus_init(i2s_bus_config *cfg)
     dev->conf.rx_fifo_reset = 0;
 
     // Start dma on front buffer
-    dev->lc_conf.val =
-        I2S_OUT_DATA_BURST_EN | I2S_OUTDSCR_BURST_EN | I2S_OUT_DATA_BURST_EN;
+    dev->lc_conf.val = I2S_OUT_DATA_BURST_EN | I2S_OUTDSCR_BURST_EN | I2S_OUT_DATA_BURST_EN;
     dev->out_link.addr = ((uint32_t)(i2s_state.dma_desc_a));
     dev->out_link.start = 1;
 

@@ -76,10 +76,10 @@ void setup()
     int cursor_x = 200;
     int cursor_y = 250;
 
-    char *string1 = "➸ 16 color grayscale  😀 \n";
-    char *string2 = "➸ Use with 4.7\" EPDs 😍 \n";
-    char *string3 = "➸ High-quality font rendering ✎🙋";
-    char *string4 = "➸ ~630ms for full frame draw 🚀\n";
+    const char *string1 = "➸ 16 color grayscale  😀 \n";
+    const char *string2 = "➸ Use with 4.7\" EPDs 😍 \n";
+    const char *string3 = "➸ High-quality font rendering ✎🙋";
+    const char *string4 = "➸ ~630ms for full frame draw 🚀\n";
 
     epd_poweron();
 

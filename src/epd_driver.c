@@ -13,7 +13,7 @@
 #include <esp_types.h>
 #include <xtensa/core-macros.h>
 
-#include "ed097oc4.h"
+#include "ed047tc1.h"
 
 
 // number of bytes needed for one line of EPD pixel data.

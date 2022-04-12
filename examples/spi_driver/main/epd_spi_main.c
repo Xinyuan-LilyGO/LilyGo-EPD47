@@ -27,7 +27,7 @@
 #else
 #include "libjpeg.h"
 #endif
-#include "ed097oc4.h"
+#include "ed047tc1.h"
 #include "cmd.h"
 
 #define GPIO_MISO 12

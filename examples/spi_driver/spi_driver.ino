@@ -20,7 +20,7 @@
 #else
 #include "libjpeg.h"
 #endif
-#include "ed097oc4.h"
+#include "ed047tc1.h"
 #ifdef ARDUINO
 #include "./main/cmd.h"
 #else

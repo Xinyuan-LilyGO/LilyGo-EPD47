@@ -1,3 +1,8 @@
+
+/******************************************************************************/
+/***        include files                                                   ***/
+/******************************************************************************/
+
 #include "ed047tc1.h"
 #include "i2s_data_bus.h"
 #include "rmt_pulse.h"
@@ -5,6 +10,14 @@
 #include <xtensa/core-macros.h>
 
 #include <string.h>
+
+/******************************************************************************/
+/***        macro definitions                                               ***/
+/******************************************************************************/
+
+/******************************************************************************/
+/***        type definitions                                                ***/
+/******************************************************************************/
 
 typedef struct
 {
@@ -18,7 +31,23 @@ typedef struct
     bool ep_output_enable : 1;
 } epd_config_register_t;
 
+/******************************************************************************/
+/***        local function prototypes                                       ***/
+/******************************************************************************/
+
+/******************************************************************************/
+/***        exported variables                                              ***/
+/******************************************************************************/
+
+/******************************************************************************/
+/***        local variables                                                 ***/
+/******************************************************************************/
+
 static epd_config_register_t config_reg;
+
+/******************************************************************************/
+/***        exported functions                                              ***/
+/******************************************************************************/
 
 /*
  * Write bits directly using the registers.
@@ -32,12 +61,6 @@ inline static void fast_gpio_set_hi(gpio_num_t gpio_num)
 inline static void fast_gpio_set_lo(gpio_num_t gpio_num)
 {
     GPIO.out_w1tc = (1 << gpio_num);
-}
-
-void IRAM_ATTR busy_delay(uint32_t cycles)
-{
-    volatile unsigned long counts = XTHAL_GET_CCOUNT() + cycles;
-    while (XTHAL_GET_CCOUNT() < counts) ;
 }
 
 inline static void IRAM_ATTR push_cfg_bit(bool bit)
@@ -72,9 +95,16 @@ static void IRAM_ATTR push_cfg(epd_config_register_t *cfg)
     fast_gpio_set_hi(CFG_STR);
 }
 
+
+void IRAM_ATTR busy_delay(uint32_t cycles)
+{
+    volatile uint64_t counts = XTHAL_GET_CCOUNT() + cycles;
+    while (XTHAL_GET_CCOUNT() < counts) ;
+}
+
+
 void epd_base_init(uint32_t epd_row_width)
 {
-
     config_reg.ep_latch_enable = false;
     config_reg.power_disable = true;
     config_reg.pos_power_enable = false;
@@ -114,7 +144,6 @@ void epd_base_init(uint32_t epd_row_width)
 
 void epd_poweron()
 {
-    // POWERON
     config_reg.ep_scan_direction = true;
     config_reg.power_disable = false;
     push_cfg(&config_reg);
@@ -128,12 +157,10 @@ void epd_poweron()
     config_reg.ep_stv = true;
     push_cfg(&config_reg);
     fast_gpio_set_hi(STH);
-    // END POWERON
 }
 
 void epd_poweroff()
 {
-    // POWEROFF
     config_reg.pos_power_enable = false;
     push_cfg(&config_reg);
     busy_delay(10 * 240);
@@ -145,11 +172,6 @@ void epd_poweroff()
 
     config_reg.ep_stv = false;
     push_cfg(&config_reg);
-
-    //   config_reg.ep_scan_direction = false;
-    //   push_cfg(&config_reg);
-
-    // END POWEROFF
 }
 
 void epd_poweroff_all()
@@ -161,6 +183,7 @@ void epd_poweroff_all()
 void epd_start_frame()
 {
     while (i2s_is_busy() || rmt_busy()) ;
+
     config_reg.ep_mode = true;
     push_cfg(&config_reg);
 
@@ -227,7 +250,15 @@ void IRAM_ATTR epd_switch_buffer()
     i2s_switch_buffer();
 }
 
-uint8_t IRAM_ATTR *epd_get_current_buffer()
+uint8_t * IRAM_ATTR epd_get_current_buffer()
 {
     return (uint8_t *)i2s_get_current_buffer();
 }
+
+/******************************************************************************/
+/***        local functions                                                 ***/
+/******************************************************************************/
+
+/******************************************************************************/
+/***        END OF FILE                                                     ***/
+/******************************************************************************/

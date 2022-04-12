@@ -1,27 +1,53 @@
+
+/******************************************************************************/
+/***        include files                                                   ***/
+/******************************************************************************/
+
 #include "rmt_pulse.h"
 
 #include <driver/rmt.h>
-#include <esp_idf_version.h>
-#if ESP_IDF_VERSION_MAJOR >= 4
 #include <hal/rmt_ll.h>
-#endif
+
+/******************************************************************************/
+/***        macro definitions                                               ***/
+/******************************************************************************/
+
+/******************************************************************************/
+/***        type definitions                                                ***/
+/******************************************************************************/
+
+/******************************************************************************/
+/***        local function prototypes                                       ***/
+/******************************************************************************/
+
+/**
+ * @brief Remote peripheral interrupt. Used to signal when transmission is done.
+ */
+static void IRAM_ATTR rmt_interrupt_handler(void *arg);
+
+/******************************************************************************/
+/***        exported variables                                              ***/
+/******************************************************************************/
+
+/******************************************************************************/
+/***        local variables                                                 ***/
+/******************************************************************************/
 
 static intr_handle_t gRMT_intr_handle = NULL;
 
-// the RMT channel configuration object
+/**
+ * @brief the RMT channel configuration object
+ */
 static rmt_config_t row_rmt_config;
 
-// keep track of wether the current pulse is ongoing
-volatile bool rmt_tx_done = true;
-
 /**
- * Remote peripheral interrupt. Used to signal when transmission is done.
+ * @brief keep track of wether the current pulse is ongoing
  */
-static void IRAM_ATTR rmt_interrupt_handler(void *arg)
-{
-    rmt_tx_done = true;
-    RMT.int_clr.val = RMT.int_st.val;
-}
+static volatile bool rmt_tx_done = true;
+
+/******************************************************************************/
+/***        exported functions                                              ***/
+/******************************************************************************/
 
 void rmt_pulse_init(gpio_num_t pin)
 {
@@ -57,6 +83,7 @@ void rmt_pulse_init(gpio_num_t pin)
 #endif
 }
 
+
 void IRAM_ATTR pulse_ckv_ticks(uint16_t high_time_ticks,
                                uint16_t low_time_ticks, bool wait)
 {
@@ -86,12 +113,28 @@ void IRAM_ATTR pulse_ckv_ticks(uint16_t high_time_ticks,
     while (wait && !rmt_tx_done) ;
 }
 
+
 void IRAM_ATTR pulse_ckv_us(uint16_t high_time_us, uint16_t low_time_us, bool wait)
 {
     pulse_ckv_ticks(10 * high_time_us, 10 * low_time_us, wait);
 }
 
+
 bool IRAM_ATTR rmt_busy()
 {
     return !rmt_tx_done;
 }
+
+/******************************************************************************/
+/***        local functions                                                 ***/
+/******************************************************************************/
+
+static void IRAM_ATTR rmt_interrupt_handler(void *arg)
+{
+    rmt_tx_done = true;
+    RMT.int_clr.val = RMT.int_st.val;
+}
+
+/******************************************************************************/
+/***        END OF FILE                                                     ***/
+/******************************************************************************/

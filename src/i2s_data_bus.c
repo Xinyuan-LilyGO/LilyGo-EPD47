@@ -1,19 +1,24 @@
+
+/******************************************************************************/
+/***        include files                                                   ***/
+/******************************************************************************/
+
 #include "i2s_data_bus.h"
 
 #include <driver/periph_ctrl.h>
 #include <esp_heap_caps.h>
-
-// #include <esp_idf_version.h>
-// #if ESP_IDF_VERSION_MAJOR >= 4
-// #include <esp32/rom/lldesc.h>
-// #else
-
 #include <rom/lldesc.h>
-
-// #endif
 #include <soc/i2s_reg.h>
 #include <soc/i2s_struct.h>
 #include <soc/rtc.h>
+
+/******************************************************************************/
+/***        macro definitions                                               ***/
+/******************************************************************************/
+
+/******************************************************************************/
+/***        type definitions                                                ***/
+/******************************************************************************/
 
 /// DMA descriptors for front and back line buffer.
 /// We use two buffers, so one can be filled while the other
@@ -28,65 +33,65 @@ typedef struct
     uint8_t *buf_b;
 } i2s_parallel_state_t;
 
-/// Indicates which line buffer is currently back / front.
-static int current_buffer = 0;
+/******************************************************************************/
+/***        local function prototypes                                       ***/
+/******************************************************************************/
 
-/// The I2S state instance.
+/**
+ * @brief Initializes a DMA descriptor.
+ */
+static void fill_dma_desc(volatile lldesc_t *dmadesc, uint8_t *buf, i2s_bus_config *cfg);
+
+/**
+ * @brief Address of the currently front DMA descriptor, which uses only the
+ *        lower 20bits (according to TRM)
+ */
+static uint32_t dma_desc_addr();
+
+/**
+ * @brief Set up a GPIO as output and route it to a signal.
+ */
+static void gpio_setup_out(int32_t gpio, int32_t sig, bool invert);
+
+/**
+ * @brief Resets "Start Pulse" signal when the current row output is done.
+ */
+static void IRAM_ATTR i2s_int_hdl(void *arg);
+
+/******************************************************************************/
+/***        exported variables                                              ***/
+/******************************************************************************/
+
+/******************************************************************************/
+/***        local variables                                                 ***/
+/******************************************************************************/
+
+/**
+ * @brief Indicates which line buffer is currently back / front.
+ */
+static int32_t current_buffer = 0;
+
+/**
+ * @brief The I2S state instance.
+ */
 static i2s_parallel_state_t i2s_state;
 
 static intr_handle_t gI2S_intr_handle = NULL;
 
-/// Indicates the device has finished its transmission and is ready again.
+/**
+ * @brief Indicates the device has finished its transmission and is ready again.
+ */
 static volatile bool output_done = true;
 
-/// The start pulse pin extracted from the configuration for use in the "done"
-/// interrupt.
+/**
+ * @brief The start pulse pin extracted from the configuration for use in
+ *        the "done" interrupt.
+ */
 static gpio_num_t start_pulse_pin;
 
-/// Initializes a DMA descriptor.
-static void fill_dma_desc(volatile lldesc_t *dmadesc, uint8_t *buf,
-                          i2s_bus_config *cfg)
-{
-    dmadesc->size = cfg->epd_row_width / 4;
-    dmadesc->length = cfg->epd_row_width / 4;
-    dmadesc->buf = buf;
-    dmadesc->eof = 1;
-    dmadesc->sosf = 1;
-    dmadesc->owner = 1;
-    dmadesc->qe.stqe_next = 0;
-    dmadesc->offset = 0;
-}
-
-/// Address of the currently front DMA descriptor,
-/// which uses only the lower 20bits (according to TRM)
-uint32_t dma_desc_addr()
-{
-    return (uint32_t)(current_buffer ? i2s_state.dma_desc_a : i2s_state.dma_desc_b) & \
-                     0x000FFFFF;
-}
-
-/// Set up a GPIO as output and route it to a signal.
-static void gpio_setup_out(int gpio, int sig, bool invert)
-{
-    if (gpio == -1) return ;
-
-    PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[gpio], PIN_FUNC_GPIO);
-    gpio_set_direction(gpio, GPIO_MODE_DEF_OUTPUT);
-    gpio_matrix_out(gpio, sig, invert, false);
-}
-
-/// Resets "Start Pulse" signal when the current row output is done.
-static void IRAM_ATTR i2s_int_hdl(void *arg)
-{
-    i2s_dev_t *dev = &I2S1;
-    if (dev->int_st.out_done)
-    {
-        gpio_set_level(start_pulse_pin, 1);
-        output_done = true;
-    }
-    // Clear the interrupt. Otherwise, the whole device would hang.
-    dev->int_clr.val = dev->int_raw.val;
-}
+/******************************************************************************/
+/***        exported functions                                              ***/
+/******************************************************************************/
 
 volatile uint8_t IRAM_ATTR *i2s_get_current_buffer()
 {
@@ -100,6 +105,7 @@ bool IRAM_ATTR i2s_is_busy()
     return !output_done || !I2S1.state.tx_idle;
 }
 
+
 void IRAM_ATTR i2s_switch_buffer()
 {
     // either device is done transmitting or the switch must be away from the
@@ -107,6 +113,7 @@ void IRAM_ATTR i2s_switch_buffer()
     while (i2s_is_busy() && dma_desc_addr() != I2S1.out_link.addr) ;
     current_buffer = !current_buffer;
 }
+
 
 void IRAM_ATTR i2s_start_line_output()
 {
@@ -128,6 +135,7 @@ void IRAM_ATTR i2s_start_line_output()
     dev->conf.tx_start = 1;
 }
 
+
 void i2s_bus_init(i2s_bus_config *cfg)
 {
     // TODO: Why?
@@ -142,10 +150,10 @@ void i2s_bus_init(i2s_bus_config *cfg)
 
     // Use I2S1 with no signal offset (for some reason the offset seems to be
     // needed in 16-bit mode, but not in 8 bit mode.
-    int signal_base = I2S1O_DATA_OUT0_IDX;
+    int32_t signal_base = I2S1O_DATA_OUT0_IDX;
 
     // Setup and route GPIOS
-    for (int x = 0; x < 8; x++)
+    for (int32_t x = 0; x < 8; x++)
     {
         gpio_setup_out(I2S_GPIO_BUS[x], signal_base + x, false);
     }
@@ -263,6 +271,7 @@ void i2s_bus_init(i2s_bus_config *cfg)
     dev->conf.tx_start = 0;
 }
 
+
 void i2s_deinit()
 {
     esp_intr_free(gI2S_intr_handle);
@@ -274,3 +283,59 @@ void i2s_deinit()
 
     periph_module_disable(PERIPH_I2S1_MODULE);
 }
+
+/******************************************************************************/
+/***        local functions                                                 ***/
+/******************************************************************************/
+
+/// Initializes a DMA descriptor.
+static void fill_dma_desc(volatile lldesc_t *dmadesc, uint8_t *buf,
+                          i2s_bus_config *cfg)
+{
+    dmadesc->size = cfg->epd_row_width / 4;
+    dmadesc->length = cfg->epd_row_width / 4;
+    dmadesc->buf = buf;
+    dmadesc->eof = 1;
+    dmadesc->sosf = 1;
+    dmadesc->owner = 1;
+    dmadesc->qe.stqe_next = 0;
+    dmadesc->offset = 0;
+}
+
+
+/// Address of the currently front DMA descriptor,
+/// which uses only the lower 20bits (according to TRM)
+static uint32_t dma_desc_addr()
+{
+    return (uint32_t)(current_buffer ? i2s_state.dma_desc_a : i2s_state.dma_desc_b) & \
+                     0x000FFFFF;
+}
+
+
+/// Set up a GPIO as output and route it to a signal.
+static void gpio_setup_out(int32_t gpio, int32_t sig, bool invert)
+{
+    if (gpio == -1) return ;
+
+    PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[gpio], PIN_FUNC_GPIO);
+    gpio_set_direction(gpio, GPIO_MODE_DEF_OUTPUT);
+    gpio_matrix_out(gpio, sig, invert, false);
+}
+
+
+/// Resets "Start Pulse" signal when the current row output is done.
+static void IRAM_ATTR i2s_int_hdl(void *arg)
+{
+    i2s_dev_t *dev = &I2S1;
+    if (dev->int_st.out_done)
+    {
+        gpio_set_level(start_pulse_pin, 1);
+        output_done = true;
+    }
+    // Clear the interrupt. Otherwise, the whole device would hang.
+    dev->int_clr.val = dev->int_raw.val;
+}
+
+/******************************************************************************/
+/***        END OF FILE                                                     ***/
+/******************************************************************************/

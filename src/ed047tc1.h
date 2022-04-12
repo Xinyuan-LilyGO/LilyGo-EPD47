@@ -1,12 +1,21 @@
-#pragma once
+#ifndef _ED047TC1_H_
+#define _ED047TC1_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/******************************************************************************/
+/***        include files                                                   ***/
+/******************************************************************************/
+
 #include <driver/gpio.h>
 
 #include <stdint.h>
+
+/******************************************************************************/
+/***        macro definitions                                               ***/
+/******************************************************************************/
 
 /* Config Reggister Control */
 #define CFG_DATA GPIO_NUM_23
@@ -30,51 +39,73 @@ extern "C" {
 #define D1 GPIO_NUM_32
 #define D0 GPIO_NUM_33
 
+/******************************************************************************/
+/***        type definitions                                                ***/
+/******************************************************************************/
+
+/******************************************************************************/
+/***        exported variables                                              ***/
+/******************************************************************************/
+
+/******************************************************************************/
+/***        exported functions                                              ***/
+/******************************************************************************/
+
 void epd_base_init(uint32_t epd_row_width);
 void epd_poweron();
 void epd_poweroff();
 
 /**
- * Start a draw cycle.
+ * @brief Start a draw cycle.
  */
 void epd_start_frame();
 
 /**
- * End a draw cycle.
+ * @brief End a draw cycle.
  */
 void epd_end_frame();
 
 /**
- * Waits until all previously submitted data has been written.
- * Then, the following operations are initiated:
+ * @brief output row data
  *
- *  - Previously submitted data is latched to the output register.
- *  - The RMT peripheral is set up to pulse the vertical (gate) driver for
- *  `output_time_dus` / 10 microseconds.
- *  - The I2S peripheral starts transmission of the current buffer to
- *  the source driver.
- *  - The line buffers are switched.
+ * @note Waits until all previously submitted data has been written.
+ *       Then, the following operations are initiated:
  *
- * This sequence of operations allows for pipelining data preparation and
- * transfer, reducing total refresh times.
+ *           1. Previously submitted data is latched to the output register.
+ *           2. The RMT peripheral is set up to pulse the vertical (gate) driver
+ *              for `output_time_dus` / 10 microseconds.
+ *           3. The I2S peripheral starts transmission of the current buffer to
+ *              the source driver.
+ *           4. The line buffers are switched.
+ *
+ *       This sequence of operations allows for pipelining data preparation and
+ *       transfer, reducing total refresh times.
  */
 void IRAM_ATTR epd_output_row(uint32_t output_time_dus);
 
-/** Skip a row without writing to it. */
+/**
+ * @brief Skip a row without writing to it.
+ */
 void IRAM_ATTR epd_skip();
 
 /**
- * Get the currently writable line buffer.
+ * @brief Get the currently writable line buffer.
  */
-uint8_t IRAM_ATTR *epd_get_current_buffer();
+uint8_t * IRAM_ATTR epd_get_current_buffer();
 
 /**
- * Switches front and back line buffer.
- * If the switched-to line buffer is currently in use,
- * this function blocks until transmission is done.
+ * @brief Switches front and back line buffer.
+ *
+ * @note If the switched-to line buffer is currently in use, this function
+ *       blocks until transmission is done.
  */
 void IRAM_ATTR epd_switch_buffer();
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif
+/******************************************************************************/
+/***        END OF FILE                                                     ***/
+/******************************************************************************/

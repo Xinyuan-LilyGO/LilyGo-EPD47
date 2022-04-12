@@ -3,12 +3,29 @@
  * data to the display, based on the I2S peripheral.
  */
 
-#pragma once
+#ifndef _I2S_DATA_BUS_H_
+#define _I2S_DATA_BUS_H_
 
-#include <stdint.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/******************************************************************************/
+/***        include files                                                   ***/
+/******************************************************************************/
 
 #include <driver/gpio.h>
 #include <esp_attr.h>
+
+#include <stdint.h>
+
+/******************************************************************************/
+/***        macro definitions                                               ***/
+/******************************************************************************/
+
+/******************************************************************************/
+/***        type definitions                                                ***/
+/******************************************************************************/
 
 /**
  * I2S bus configuration parameters.
@@ -35,35 +52,53 @@ typedef struct
     uint32_t epd_row_width;
 } i2s_bus_config;
 
+/******************************************************************************/
+/***        exported variables                                              ***/
+/******************************************************************************/
+
+/******************************************************************************/
+/***        exported functions                                              ***/
+/******************************************************************************/
+
 /**
- * Initialize the I2S data bus for communication
- * with a 8bit parallel display interface.
+ * @brief Initialize the I2S data bus for communication with a 8bit parallel
+ *        display interface.
  */
 void i2s_bus_init(i2s_bus_config *cfg);
 
 /**
- * Get the currently writable line buffer.
+ * @brief Get the currently writable line buffer.
  */
 volatile uint8_t IRAM_ATTR *i2s_get_current_buffer();
 
 /**
- * Switches front and back line buffer.
- * If the switched-to line buffer is currently in use,
- * this function blocks until transmission is done.
+ * @brief Switches front and back line buffer.
+ *
+ * @note If the switched-to line buffer is currently in use, this function
+ *       blocks until transmission is done.
  */
 void IRAM_ATTR i2s_switch_buffer();
 
 /**
- * Start transmission of the current back buffer.
+ * @brief Start transmission of the current back buffer.
  */
 void IRAM_ATTR i2s_start_line_output();
 
 /**
- * Returns true if there is an ongoing transmission.
+ * @brief Returns true if there is an ongoing transmission.
  */
 bool IRAM_ATTR i2s_is_busy();
 
 /**
- * Give up allocated resources.
+ * @brief Give up allocated resources.
  */
 void i2s_deinit();
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+/******************************************************************************/
+/***        END OF FILE                                                     ***/
+/******************************************************************************/

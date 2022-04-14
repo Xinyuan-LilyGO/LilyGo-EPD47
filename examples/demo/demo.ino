@@ -14,26 +14,31 @@
 #include <SD.h>
 #include "logo.h"
 
+#ifdef CONFIG_IDF_TARGET_ESP32
 #define BATT_PIN            36
+#else
+#define BATT_PIN            14
+#endif
+
 #define SD_MISO             12
 #define SD_MOSI             13
 #define SD_SCLK             14
 #define SD_CS               15
 
-uint8_t *framebuffer;
 int vref = 1100;
 
 void setup()
 {
-    char buf[128];
-
     Serial.begin(115200);
 
-    /*
+    char buf[128];
+#ifdef CONFIG_IDF_TARGET_ESP32
+    /**
     * SD Card test
     * Only as a test SdCard hardware, use example reference
     * https://github.com/espressif/arduino-esp32/tree/master/libraries/SD/examples
-    * * */
+    */
+
     SPI.begin(SD_SCLK, SD_MISO, SD_MOSI);
     bool rlst = SD.begin(SD_CS);
     if (!rlst) {
@@ -42,23 +47,24 @@ void setup()
     } else {
         snprintf(buf, 128, "➸ Detected SdCard insert:%.2f GB", SD.cardSize() / 1024.0 / 1024.0 / 1024.0);
     }
+#else
+    snprintf(buf, 128, "➸ dual-core XTensa LX7 MCU");
+#endif
+
 
     // Correct the ADC reference voltage
     esp_adc_cal_characteristics_t adc_chars;
+#ifdef CONFIG_IDF_TARGET_ESP32
     esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
+#else
+    esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_2, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
+#endif
     if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) {
         Serial.printf("eFuse Vref:%u mV", adc_chars.vref);
         vref = adc_chars.vref;
     }
 
     epd_init();
-
-    framebuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
-    if (!framebuffer) {
-        Serial.println("alloc memory failed !!!");
-        while (1);
-    }
-    memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
 
     Rect_t area = {
         .x = 230,
@@ -69,7 +75,8 @@ void setup()
 
     epd_poweron();
     epd_clear();
-    epd_draw_grayscale_image(area, (uint8_t *)logo_data);
+    // epd_draw_grayscale_image(area, (uint8_t *)logo_data);
+    epd_draw_image(area, (uint8_t *)logo_data, BLACK_ON_WHITE);
     epd_poweroff();
 
 
@@ -103,7 +110,6 @@ void setup()
     delay(500);
 
     epd_poweroff();
-
 }
 
 void loop()
@@ -129,14 +135,17 @@ void loop()
     writeln((GFXfont *)&FiraSans, (char *)voltage.c_str(), &cursor_x, &cursor_y, NULL);
 
 
-    // There are two ways to close
-
-
-    // It will turn off the power of the ink screen, but cannot turn off the blue LED light.
+    /**
+     * There are two ways to close
+     * It will turn off the power of the ink screen, but cannot turn off the blue LED light.
+     */
     // epd_poweroff();
 
-    //It will turn off the power of the entire
-    // POWER_EN control and also turn off the blue LED light
+    /**
+     * It will turn off the power of the entire
+     * POWER_EN control and also turn off the blue LED light
+     */
     epd_poweroff_all();
+
     delay(5000);
 }

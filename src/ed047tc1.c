@@ -182,7 +182,7 @@ void epd_poweroff_all()
 
 void epd_start_frame()
 {
-    while (i2s_is_busy() || rmt_busy()) ;
+    while (i2s_is_busy()) ;
 
     config_reg.ep_mode = true;
     push_cfg(&config_reg);
@@ -225,7 +225,7 @@ void IRAM_ATTR epd_skip()
 
 void IRAM_ATTR epd_output_row(uint32_t output_time_dus)
 {
-    while (i2s_is_busy() || rmt_busy());
+    while (i2s_is_busy());
 
     latch_row();
 

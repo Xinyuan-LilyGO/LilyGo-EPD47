@@ -14,6 +14,20 @@
 - 选择正确的端口，然后点击上传
 - 图片与文字生成请看[脚本使用说明](./scripts/README.MD)
 
+## 必备
+
+需要将 [arduino-esp32](https://github.com/espressif/arduino-esp32) 升级到 `2.0.3-RC1` 版本，才支持 `ESP32-S3`。
+
+升级现有的开发环境，可以参考以下方法：
+
+```shell
+$ pwd
+/c/Users/lyy/Documents/Arduino
+$ cd hardware/espressif/esp32/
+$ git checkout 2.0.3-RC1
+$ git submodule update
+```
+
 ## 相关项目
 
 - [OpenWeather Display](https://github.com/Xinyuan-LilyGO/LilyGo-EPD-4-7-OWM-Weather-Display.git)

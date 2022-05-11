@@ -10,20 +10,39 @@
 #include "firasans.h"
 #include "esp_adc_cal.h"
 #include <Wire.h>
+#include "FS.h"
 #include <SPI.h>
 #include <SD.h>
 #include "logo.h"
 
-#ifdef CONFIG_IDF_TARGET_ESP32
-#define BATT_PIN            36
-#else
-#define BATT_PIN            14
+#ifdef CONFIG_IDF_TARGET_ESP32S3
+#if ARDUINO_USB_CDC_ON_BOOT
+#error "Please disable USB CDC ON BOOT"
+#endif
 #endif
 
+#ifdef CONFIG_IDF_TARGET_ESP32
+#define BATT_PIN            36
+#elif CONFIG_IDF_TARGET_ESP32S3
+#define BATT_PIN            14
+#else
+#error "Platform not supported"
+#endif
+
+#ifdef CONFIG_IDF_TARGET_ESP32
 #define SD_MISO             12
 #define SD_MOSI             13
 #define SD_SCLK             14
 #define SD_CS               15
+#elif CONFIG_IDF_TARGET_ESP32S3
+#define SD_MISO             16
+#define SD_MOSI             15
+#define SD_SCLK             11
+#define SD_CS               42
+#else
+#error "Platform not supported"
+#endif
+
 
 int vref = 1100;
 
@@ -32,25 +51,20 @@ void setup()
     Serial.begin(115200);
 
     char buf[128];
-#ifdef CONFIG_IDF_TARGET_ESP32
     /**
     * SD Card test
     * Only as a test SdCard hardware, use example reference
     * https://github.com/espressif/arduino-esp32/tree/master/libraries/SD/examples
     */
-
-    SPI.begin(SD_SCLK, SD_MISO, SD_MOSI);
-    bool rlst = SD.begin(SD_CS);
+    SPI.begin(SD_SCLK, SD_MISO, SD_MOSI, SD_CS);
+    bool rlst = SD.begin(SD_CS, SPI);
     if (!rlst) {
         Serial.println("SD init failed");
         snprintf(buf, 128, "➸ No detected SdCard");
     } else {
+        Serial.println("SD init success");
         snprintf(buf, 128, "➸ Detected SdCard insert:%.2f GB", SD.cardSize() / 1024.0 / 1024.0 / 1024.0);
     }
-#else
-    snprintf(buf, 128, "➸ dual-core XTensa LX7 MCU");
-#endif
-
 
     // Correct the ADC reference voltage
     esp_adc_cal_characteristics_t adc_chars;

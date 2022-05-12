@@ -1,0 +1,114 @@
+Index: drawImages/CMakeLists.txt
+===================================================================
+--- /dev/null
++++ drawImages/CMakeLists.txt
+@@ -0,0 +1,8 @@
++cmake_minimum_required(VERSION 3.5)
++
++set(EXTRA_COMPONENT_DIRS "../../src")
++# list(APPEND EXTRA_COMPONENT_DIRS "../../src/libjpeg")
++list(APPEND EXTRA_COMPONENT_DIRS "../../src/zlib")
++
++include($ENV{IDF_PATH}/tools/cmake/project.cmake)
++project(drawImages)
+Index: drawImages/main/CMakeLists.txt
+===================================================================
+--- /dev/null
++++ drawImages/main/CMakeLists.txt
+@@ -0,0 +1,2 @@
++idf_component_register(SRCS "drawImages.c"
++                    INCLUDE_DIRS "..")
+Index: drawImages/main/drawImages.c
+===================================================================
+--- /dev/null
++++ drawImages/main/drawImages.c
+@@ -0,0 +1,89 @@
++/* Simple firmware for a ESP32 displaying a static image on an EPaper Screen.
++ *
++ * Write an image into a header file using a 3...2...1...0 format per pixel,
++ * for 4 bits color (16 colors - well, greys.) MSB first.  At 80 MHz, screen
++ * clears execute in 1.075 seconds and images are drawn in 1.531 seconds.
++ */
++
++// #include <Arduino.h>
++#include "freertos/FreeRTOS.h"
++#include "freertos/task.h"
++#include "epd_driver.h"
++#include "pic1.h"
++#include "pic2.h"
++#include "pic3.h"
++
++#include <string.h>
++#include "esp_timer.h"
++
++uint8_t *framebuffer;
++
++void main_loop();
++void update(uint32_t delay_ms);
++
++void delay(uint32_t ms)
++{
++    vTaskDelay(ms / portTICK_PERIOD_MS);
++}
++
++void app_main()
++{
++    // Serial.begin(115200);
++
++    epd_init();
++
++    framebuffer = (uint8_t *)heap_caps_malloc(EPD_WIDTH * EPD_HEIGHT / 2, MALLOC_CAP_SPIRAM);
++    memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
++
++    while (1)
++    {
++        main_loop();
++    }
++}
++
++void update(uint32_t delay_ms)
++{
++    epd_poweron();
++    epd_clear();
++    volatile uint64_t t1 = esp_timer_get_time();
++    epd_draw_grayscale_image(epd_full_screen(), framebuffer);
++    volatile uint64_t t2 = esp_timer_get_time();
++    printf("EPD draw took %lldms.\n", (t2 - t1)/1000);
++    epd_poweroff();
++    delay(delay_ms);
++}
++
++void main_loop()
++{
++    Rect_t area = {
++        .x = 0,
++        .y = 0,
++        .width = pic1_width,
++        .height =  pic1_height
++    };
++    epd_poweron();
++    epd_clear();
++    epd_draw_grayscale_image(area, (uint8_t *) pic1_data);
++    epd_poweroff();
++    delay(3000);
++
++    Rect_t area1 = {
++        .x = 0,
++        .y = 0,
++        .width = pic2_width,
++        .height =  pic2_height
++    };
++    epd_copy_to_framebuffer(area1, (uint8_t *) pic2_data, framebuffer);
++
++    update(3000);
++
++    Rect_t area2 = {
++        .x = 0,
++        .y = 0,
++        .width = pic3_width,
++        .height =  pic3_height
++    };
++    epd_copy_to_framebuffer(area2, (uint8_t *) pic3_data, framebuffer);
++
++    update(3000);
++}

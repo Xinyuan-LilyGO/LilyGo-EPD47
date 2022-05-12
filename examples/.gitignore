@@ -1,0 +1,9 @@
+.pc
+.vscode
+.pio
+build
+main
+CMakeLists.txt
+sdkconfig*
+weather_plus
+weather_plus.rar

@@ -101,23 +101,23 @@ const char *jd_errors[] = {
 
 // Affects the gamma to calculate gray (lower is darker/higher contrast)
 // Nice test values: 0.9 1.2 1.4 higher and is too bright
-double gamma_value = 0.9;
+static double gamma_value = 0.9;
 
-uint32_t jpeg_buf_pos;
+static uint32_t jpeg_buf_pos;
 
-uint8_t *decoded_image;   // RAW decoded image
-uint8_t tjpgd_work[4096]; // tjpgd 4Kb buffer
+static uint8_t *decoded_image;   // RAW decoded image
+static uint8_t tjpgd_work[4096]; // tjpgd 4Kb buffer
 
 #if LIBJPEG_MEASURE
-uint32_t time_epd_fullclear = 0;
-uint32_t time_decomp = 0;
-uint32_t time_update_screen = 0;
-uint32_t time_render = 0;
+static uint32_t time_epd_fullclear = 0;
+static uint32_t time_decomp = 0;
+static uint32_t time_update_screen = 0;
+static uint32_t time_render = 0;
 #endif
 
-uint8_t gamme_curve[256];
+static uint8_t gamme_curve[256];
 
-const char *TAG = "LIB_JPEG";
+const char *TAG = "JPEG";
 
 /******************************************************************************/
 /***        exported functions                                              ***/

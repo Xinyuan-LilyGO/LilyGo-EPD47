@@ -18,6 +18,7 @@
 
 - [OpenWeather Display](https://github.com/Xinyuan-LilyGO/LilyGo-EPD-4-7-OWM-Weather-Display.git)
 - [EPD47-HC08](https://github.com/Xinyuan-LilyGO/EPD47-HC08.git)
+- [Variometer](https://github.com/Oganisyan/Variometer-LilyGoEPD47)
 
 ## 常问问题
 

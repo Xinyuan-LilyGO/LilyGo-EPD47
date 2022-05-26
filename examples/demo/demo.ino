@@ -13,28 +13,29 @@
 #include "FS.h"
 #include <SPI.h>
 #include <SD.h>
+// #include <SD_MMC.h>
 #include "logo.h"
 
-#ifdef CONFIG_IDF_TARGET_ESP32S3
-#if ARDUINO_USB_CDC_ON_BOOT
-#error "Please disable USB CDC ON BOOT"
-#endif
-#endif
+// #if defined(CONFIG_IDF_TARGET_ESP32S3)
+// #if ARDUINO_USB_CDC_ON_BOOT
+// #error "Please disable USB CDC ON BOOT"
+// #endif
+// #endif
 
-#ifdef CONFIG_IDF_TARGET_ESP32
+#if defined(CONFIG_IDF_TARGET_ESP32)
 #define BATT_PIN            36
-#elif CONFIG_IDF_TARGET_ESP32S3
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
 #define BATT_PIN            14
 #else
 #error "Platform not supported"
 #endif
 
-#ifdef CONFIG_IDF_TARGET_ESP32
+#if defined(CONFIG_IDF_TARGET_ESP32)
 #define SD_MISO             12
 #define SD_MOSI             13
 #define SD_SCLK             14
 #define SD_CS               15
-#elif CONFIG_IDF_TARGET_ESP32S3
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
 #define SD_MISO             16
 #define SD_MOSI             15
 #define SD_SCLK             11
@@ -49,6 +50,7 @@ int vref = 1100;
 void setup()
 {
     Serial.begin(115200);
+    delay(1000);
 
     char buf[128];
     /**
@@ -57,6 +59,8 @@ void setup()
     * https://github.com/espressif/arduino-esp32/tree/master/libraries/SD/examples
     */
     SPI.begin(SD_SCLK, SD_MISO, SD_MOSI, SD_CS);
+    // SD_MMC.setPins(SD_SCLK, SD_MOSI, SD_MISO);
+    // bool rlst = SD_MMC.begin("/sdcard", true);
     bool rlst = SD.begin(SD_CS, SPI);
     if (!rlst) {
         Serial.println("SD init failed");

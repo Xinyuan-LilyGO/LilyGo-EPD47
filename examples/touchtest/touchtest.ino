@@ -13,11 +13,17 @@
 #include <touch.h>
 #include "lilygo.h"
 
+#if defined(CONFIG_IDF_TARGET_ESP32)
+#define TOUCH_SCL   14
+#define TOUCH_SDA   15
 #define TOUCH_INT   13
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#define TOUCH_SCL   17
+#define TOUCH_SDA   18
+#define TOUCH_INT   47
+#endif
 TouchClass touch;
 uint8_t *framebuffer = NULL;
-
-
 
 const char overview[] = {
     "   ESP32 is a single 2.4 GHz Wi-Fi-and-Bluetooth\n"\
@@ -66,14 +72,13 @@ void setup()
 
     pinMode(TOUCH_INT, INPUT_PULLUP);
 
-    Wire.begin(15, 14);
+    Wire.begin(TOUCH_SDA, TOUCH_SCL);
 
     if (!touch.begin()) {
         Serial.println("start touchscreen failed");
         while (1);
     }
     Serial.println("Started Touchscreen poll...");
-
 
     framebuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
     if (!framebuffer) {
@@ -111,8 +116,6 @@ void setup()
     epd_poweroff();
 
 }
-
-
 
 
 void loop()
@@ -167,9 +170,12 @@ void loop()
 
                 // esp_sleep_enable_ext1_wakeup(GPIO_SEL_13, ESP_EXT1_WAKEUP_ANY_HIGH);
 
+#if defined(CONFIG_IDF_TARGET_ESP32)
                 // Set to wake up by GPIO39
                 esp_sleep_enable_ext1_wakeup(GPIO_SEL_39, ESP_EXT1_WAKEUP_ALL_LOW);
-
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+                esp_sleep_enable_ext1_wakeup(GPIO_SEL_21, ESP_EXT1_WAKEUP_ALL_LOW);
+#endif
                 esp_deep_sleep_start();
                 break;
             case 4:

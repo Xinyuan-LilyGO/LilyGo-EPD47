@@ -24,32 +24,6 @@
 
 参看esp32 Arduino的编译
 
-#### GNU Make
-
-参看esp32 GNU Make的使用
-
-```shell
-$ pwd
-LilyGo-EPD47/examples/spi_driver
-$ make menuconfig
-$ make all
-$ sudo make flash monitor
-```
-
-具体的使用, 请参考[esp-idf GUN Make 入门指南](https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.3/esp32/get-started-legacy/index.html)
-
-#### CMake
-
-```shell
-$ pwd
-LilyGo-EPD47/examples/spi_driver
-$ idf.py menuconfig
-$ idf.py build
-$ idf.py -p PORT [-b BAUD] flash
-```
-
-具体的使用, 请参考[esp-idf 入门指南](https://docs.espressif.com/projects/esp-idf/zh_CN/release-v4.3/esp32/get-started/index.html)
-
 ### 测试
 
 在树莓派执行以下指令:
@@ -68,7 +42,6 @@ send img time:  0.18109393119812012 s
 img size= 259200
 send img time:  1.971804141998291 s
 ```
-
 
 ## 故障排除
 

@@ -3,14 +3,10 @@
 #endif
 
 #include <Arduino.h>
-#include <esp_task_wdt.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "epd_driver.h"
 #include "firasans.h"
 #include "esp_adc_cal.h"
-#include <Wire.h>
-#include "FS.h"
+#include <FS.h>
 #include <SPI.h>
 #include <SD.h>
 // #include <SD_MMC.h>

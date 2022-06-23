@@ -3,14 +3,9 @@
 #endif
 
 #include <Arduino.h>
-#include <esp_task_wdt.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "epd_driver.h"
 #include "firasans.h"
-#include "esp_adc_cal.h"
 #include "Button2.h"
-#include <Wire.h>
 #include "lilygo.h"
 #include "logo.h"
 

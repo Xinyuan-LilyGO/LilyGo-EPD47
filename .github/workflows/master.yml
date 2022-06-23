@@ -45,7 +45,7 @@ jobs:
         pip install --upgrade platformio
     - name: Run PlatformIO
       run: |
-        cd examples\button
+        cd examples/button
         pio run
 
   demo:
@@ -74,7 +74,7 @@ jobs:
         pip install --upgrade platformio
     - name: Run PlatformIO
       run: |
-        cd examples\demo
+        cd examples/demo
         pio run
 
   drawImages:
@@ -103,7 +103,7 @@ jobs:
         pip install --upgrade platformio
     - name: Run PlatformIO
       run: |
-        cd examples\drawImages
+        cd examples/drawImages
         pio run
 
   grayscale_test:
@@ -132,7 +132,7 @@ jobs:
         pip install --upgrade platformio
     - name: Run PlatformIO
       run: |
-        cd examples\grayscale_test
+        cd examples/grayscale_test
         pio run
 
   screen_repair:
@@ -161,7 +161,7 @@ jobs:
         pip install --upgrade platformio
     - name: Run PlatformIO
       run: |
-        cd examples\screen_repair
+        cd examples/screen_repair
         pio run
 
   spi_driver:
@@ -190,7 +190,7 @@ jobs:
         pip install --upgrade platformio
     - name: Run PlatformIO
       run: |
-        cd examples\spi_driver
+        cd examples/spi_driver
         pio run
 
   touchtest:
@@ -219,5 +219,5 @@ jobs:
         pip install --upgrade platformio
     - name: Run PlatformIO
       run: |
-        cd examples\touchtest
+        cd examples/touchtest
         pio run

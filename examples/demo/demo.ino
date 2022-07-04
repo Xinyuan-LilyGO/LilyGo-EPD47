@@ -9,18 +9,16 @@
 #include <FS.h>
 #include <SPI.h>
 #include <SD.h>
-// #include <SD_MMC.h>
 #include "logo.h"
 
-// #if defined(CONFIG_IDF_TARGET_ESP32S3)
-// #if ARDUINO_USB_CDC_ON_BOOT
-// #error "Please disable USB CDC ON BOOT"
-// #endif
-// #endif
+#if CONFIG_IDF_TARGET_ESP32S3
+#include "pcf8563.h"
+#include <Wire.h>
+#endif
 
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if CONFIG_IDF_TARGET_ESP32
 #define BATT_PIN            36
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#elif CONFIG_IDF_TARGET_ESP32S3
 #define BATT_PIN            14
 #else
 #error "Platform not supported"
@@ -40,6 +38,11 @@
 #error "Platform not supported"
 #endif
 
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+PCF8563_Class rtc;
+#define TOUCH_SCL   17
+#define TOUCH_SDA   18
+#endif
 
 int vref = 1100;
 
@@ -77,6 +80,12 @@ void setup()
         Serial.printf("eFuse Vref:%u mV", adc_chars.vref);
         vref = adc_chars.vref;
     }
+
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+    Wire.begin(TOUCH_SDA, TOUCH_SCL);
+    rtc.begin();
+    rtc.setDateTime(2022, 6, 30, 0, 0, 0);
+#endif
 
     epd_init();
 
@@ -134,12 +143,19 @@ void loop()
     uint16_t v = analogRead(BATT_PIN);
     float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
     String voltage = "➸ Voltage: " + String(battery_voltage) + "V";
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+    voltage = voltage + String(" (") + rtc.formatDateTime(PCF_TIMEFORMAT_YYYY_MM_DD_H_M_S) + String(")");
+#endif
     Serial.println(voltage);
 
     Rect_t area = {
         .x = 200,
         .y = 460,
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+        .width = 700,
+#else
         .width = 320,
+#endif
         .height = 50,
     };
 

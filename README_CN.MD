@@ -16,7 +16,7 @@
 
 ## 必备
 
-需要将 [arduino-esp32](https://github.com/espressif/arduino-esp32) 升级到 `2.0.3-RC1` 版本，才支持 `ESP32-S3`。
+需要将 [arduino-esp32](https://github.com/espressif/arduino-esp32) 升级到 `2.0.3` 版本，才支持 `ESP32-S3`。
 
 升级现有的开发环境，可以参考以下方法：
 
@@ -24,7 +24,7 @@
 $ pwd
 /c/Users/lyy/Documents/Arduino
 $ cd hardware/espressif/esp32/
-$ git checkout 2.0.3-RC1
+$ git checkout 2.0.3
 $ git submodule update
 ```
 

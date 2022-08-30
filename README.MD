@@ -18,7 +18,7 @@
 
 ## Required
 
-[arduino-esp32](https://github.com/espressif/arduino-esp32) needs to be upgraded to `2.0.3-RC1` version to support `ESP32-S3`.
+[arduino-esp32](https://github.com/espressif/arduino-esp32) needs to be upgraded to `2.0.3` version to support `ESP32-S3`.
 
 To upgrade the existing development environment, please refer to the following methods:
 
@@ -26,7 +26,7 @@ To upgrade the existing development environment, please refer to the following m
 $ pwd
 /c/Users/lyy/Documents/Arduino
 $ cd hardware/espressif/esp32/
-$ git checkout 2.0.3-RC1
+$ git checkout 2.0.3
 $ git submodule update
 ```
 

@@ -1,59 +1,64 @@
-/*
-  SDWebServer - Example WebServer with SD Card backend for esp8266
-
-  Copyright (c) 2015 Hristo Gochkov. All rights reserved.
-  This file is part of the WebServer library for Arduino environment.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-  Have a FAT Formatted SD Card connected to the SPI port of the ESP8266
-  The web root is the SD Card root folder
-  File extensions with more than 3 charecters are not supported by the SD Library
-  File Names longer than 8 charecters will be truncated by the SD library, so keep filenames shorter
-  index.htm is the default index (works on subfolders as well)
-
-  upload the contents of SdRoot to the root of the SDcard and access the editor by going to http://esp8266sd.local/edit
-  To retrieve the contents of SDcard, visit http://esp32sd.local/list?dir=/
-      dir is the argument that needs to be passed to the function PrintDirectory via HTTP Get request.
-
-*/
-
-/*
-Routine modification is based on Arduino-WebServer.
-Add JPG image display.
-The image size should be below 960 x 540
-*/
+#ifndef BOARD_HAS_PSRAM
+#error "Please enable PSRAM !!!"
+#endif
 
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
-#include <SPI.h>
-#include <SPIFFS.h>
+#include <Arduino.h>
 #include "epd_driver.h"
 #include "libjpeg/libjpeg.h"
+#include "firasans.h"
+#include "esp_adc_cal.h"
+#include <FS.h>
+#include <SPI.h>
+#include <SD.h>
+#include "logo.h"
+
+#define FILE_SYSTEM SD
+
+#if CONFIG_IDF_TARGET_ESP32S3
+#include "pcf8563.h"
+#include <Wire.h>
+#endif
+
+#if CONFIG_IDF_TARGET_ESP32
+#define BATT_PIN 36
+#elif CONFIG_IDF_TARGET_ESP32S3
+#define BATT_PIN 14
+#else
+#error "Platform not supported"
+#endif
+
+#if defined(CONFIG_IDF_TARGET_ESP32)
+#define SD_MISO 12
+#define SD_MOSI 13
+#define SD_SCLK 14
+#define SD_CS 15
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#define SD_MISO 16
+#define SD_MOSI 15
+#define SD_SCLK 11
+#define SD_CS 42
+#else
+#error "Platform not supported"
+#endif
+
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
+PCF8563_Class rtc;
+#define TOUCH_SCL 17
+#define TOUCH_SDA 18
+#endif
 
 #define DBG_OUTPUT_PORT Serial
 
-const char *ssid = "your-ssid";
-const char *password = "your-password";
-const char *host = "esp32sd";
+const char *ssid = "ChinaNet-A179";
+const char *password = "88888888";
+const char *host = "esp32s3";
 
 WebServer server(80);
-
-static bool hasSPIFFS = false;
+static bool hasFILE_SYSTEM = false;
 File uploadFile;
 EventGroupHandle_t handleServer;
 String pic_path;
@@ -71,7 +76,7 @@ void returnFail(String msg)
     server.send(500, "text/plain", msg + "\r\n");
 }
 
-bool loadFromSPIFFSCard(String path)
+bool loadFromFILE_SYSTEM(String path)
 {
     String dataType = "text/plain";
     if (path.endsWith("/"))
@@ -124,12 +129,12 @@ bool loadFromSPIFFSCard(String path)
         dataType = "application/zip";
     }
 
-    File dataFile = SPIFFS.open(path.c_str());
+    File dataFile = FILE_SYSTEM.open(path.c_str());
     if (dataFile.isDirectory())
     {
         path += "/index.htm";
         dataType = "text/html";
-        dataFile = SPIFFS.open(path.c_str());
+        dataFile = FILE_SYSTEM.open(path.c_str());
     }
 
     if (!dataFile)
@@ -160,11 +165,11 @@ void handleFileUpload()
     HTTPUpload &upload = server.upload();
     if (upload.status == UPLOAD_FILE_START)
     {
-        if (SPIFFS.exists((char *)upload.filename.c_str()))
+        if (FILE_SYSTEM.exists((char *)upload.filename.c_str()))
         {
-            SPIFFS.remove((char *)upload.filename.c_str());
+            FILE_SYSTEM.remove((char *)upload.filename.c_str());
         }
-        uploadFile = SPIFFS.open(upload.filename.c_str(), FILE_WRITE);
+        uploadFile = FILE_SYSTEM.open(upload.filename.c_str(), FILE_WRITE);
         DBG_OUTPUT_PORT.print("Upload: START, filename: ");
         DBG_OUTPUT_PORT.println(upload.filename);
     }
@@ -190,11 +195,11 @@ void handleFileUpload()
 
 void deleteRecursive(String path)
 {
-    File file = SPIFFS.open((char *)path.c_str());
+    File file = FILE_SYSTEM.open((char *)path.c_str());
     if (!file.isDirectory())
     {
         file.close();
-        SPIFFS.remove((char *)path.c_str());
+        FILE_SYSTEM.remove((char *)path.c_str());
         return;
     }
 
@@ -215,12 +220,12 @@ void deleteRecursive(String path)
         else
         {
             entry.close();
-            SPIFFS.remove((char *)entryPath.c_str());
+            FILE_SYSTEM.remove((char *)entryPath.c_str());
         }
         yield();
     }
 
-    SPIFFS.rmdir((char *)path.c_str());
+    FILE_SYSTEM.rmdir((char *)path.c_str());
     file.close();
 }
 
@@ -231,7 +236,7 @@ void handleDelete()
         return returnFail("BAD ARGS");
     }
     String path = server.arg(0);
-    if (path == "/" || !SPIFFS.exists((char *)path.c_str()))
+    if (path == "/" || !FILE_SYSTEM.exists((char *)path.c_str()))
     {
         returnFail("BAD PATH");
         return;
@@ -247,7 +252,7 @@ void handleCreate()
         return returnFail("BAD ARGS");
     }
     String path = server.arg(0);
-    if (path == "/" || SPIFFS.exists((char *)path.c_str()))
+    if (path == "/" || FILE_SYSTEM.exists((char *)path.c_str()))
     {
         returnFail("BAD PATH");
         return;
@@ -255,7 +260,7 @@ void handleCreate()
 
     if (path.indexOf('.') > 0)
     {
-        File file = SPIFFS.open((char *)path.c_str(), FILE_WRITE);
+        File file = FILE_SYSTEM.open((char *)path.c_str(), FILE_WRITE);
         if (file)
         {
             file.write(0);
@@ -264,7 +269,7 @@ void handleCreate()
     }
     else
     {
-        SPIFFS.mkdir((char *)path.c_str());
+        FILE_SYSTEM.mkdir((char *)path.c_str());
     }
     returnOK();
 }
@@ -289,11 +294,11 @@ void printDirectory()
         return returnFail("BAD ARGS");
     }
     String path = server.arg("dir");
-    if (path != "/" && !SPIFFS.exists((char *)path.c_str()))
+    if (path != "/" && !FILE_SYSTEM.exists((char *)path.c_str()))
     {
         return returnFail("BAD PATH");
     }
-    File dir = SPIFFS.open((char *)path.c_str());
+    File dir = FILE_SYSTEM.open((char *)path.c_str());
     path = String();
     if (!dir.isDirectory())
     {
@@ -335,11 +340,11 @@ void printDirectory()
 
 void handleNotFound()
 {
-    if (hasSPIFFS && loadFromSPIFFSCard(server.uri()))
+    if (hasFILE_SYSTEM && loadFromFILE_SYSTEM(server.uri()))
     {
         return;
     }
-    String message = "SPIFFSCARD Not Detected\n\n";
+    String message = "FILE SYSTEM Not Detected\n\n";
     message += "URI: ";
     message += server.uri();
     message += "\nMethod: ";
@@ -355,7 +360,7 @@ void handleNotFound()
     DBG_OUTPUT_PORT.print(message);
 }
 
-void setup(void)
+void setup()
 {
     handleServer = xEventGroupCreate();
     DBG_OUTPUT_PORT.begin(115200);
@@ -406,13 +411,14 @@ void setup(void)
               returnOK(); });
     server.on("/show", HTTP_POST, handleGetPath);
     server.onNotFound(handleNotFound);
-
     server.begin();
     DBG_OUTPUT_PORT.println("HTTP server started");
-    if (SPIFFS.begin())
+
+    SPI.begin(SD_SCLK, SD_MISO, SD_MOSI, SD_CS);
+    if (FILE_SYSTEM.begin(SD_CS, SPI))
     {
-        DBG_OUTPUT_PORT.println("SPIFFS Card initialized.");
-        hasSPIFFS = true;
+        DBG_OUTPUT_PORT.println("FILE_SYSTEM Card initialized.");
+        hasFILE_SYSTEM = true;
     }
 
     /* Initialize the screen */
@@ -428,9 +434,22 @@ void setup(void)
     memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
     epd_poweron();
     epd_clear();
+
+    Rect_t area = {
+        .x = 256,
+        .y = 180,
+        .width = logo_width,
+        .height = logo_height,
+    };
+
+    epd_poweron();
+    epd_clear();
+    // epd_draw_grayscale_image(area, (uint8_t *)logo_data);
+    epd_draw_image(area, (uint8_t *)logo_data, BLACK_ON_WHITE);
+    epd_poweroff();
 }
 
-void loop(void)
+void loop()
 {
     server.handleClient();
     delay(2); // allow the cpu to switch to other tasks
@@ -446,7 +465,7 @@ void loop(void)
     {
         xEventGroupClearBits(handleServer, BIT_SHOW);
         epd_poweron();
-        File jpg = SPIFFS.open(pic_path);
+        File jpg = FILE_SYSTEM.open(pic_path);
         String jpg_p;
         while (jpg.available())
             jpg_p += jpg.readString();

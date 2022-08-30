@@ -16,6 +16,20 @@
 - Select the correct port and click upload
 - Please refer to [Script Instructions](./scripts/README.MD) for picture and text generation 
 
+## Required
+
+[arduino-esp32](https://github.com/espressif/arduino-esp32) needs to be upgraded to `2.0.3-RC1` version to support `ESP32-S3`.
+
+To upgrade the existing development environment, please refer to the following methods:
+
+```shell
+$ pwd
+/c/Users/lyy/Documents/Arduino
+$ cd hardware/espressif/esp32/
+$ git checkout 2.0.3-RC1
+$ git submodule update
+```
+
 ## Related Projects
 
 - [OpenWeather Display](https://github.com/Xinyuan-LilyGO/LilyGo-EPD-4-7-OWM-Weather-Display.git)

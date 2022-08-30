@@ -24,30 +24,6 @@ In this example, esp32 is used as the driver chip of epd (instead of it8951), an
 
 Refer to the use of esp32 Arduino
 
-#### GNU Make
-
-```shell
-$ pwd
-LilyGo-EPD47/examples/spi_driver
-$ make menuconfig
-$ make all
-$ sudo make flash monitor
-```
-
-For specific usage, please refer to [esp-idf Get Started (Legacy GNU Make)](https://docs.espressif.com/projects/esp-idf/en/release-v4.3/esp32/get-started-legacy/index.html)
-
-#### CMake
-
-```shell
-$ pwd
-LilyGo-EPD47/examples/spi_driver
-$ idf.py menuconfig
-$ idf.py build
-$ idf.py -p PORT [-b BAUD] flash
-```
-
-For specific usage, please refer to [esp-idf Get Started](https://docs.espressif.com/projects/esp-idf/en/release-v4.3/esp32/get-started/index.html)
-
 ### Test
 
 Execute the following commands on the Raspberry Pi:
@@ -66,7 +42,6 @@ send img time:  0.18109393119812012 s
 img size= 259200
 send img time:  1.971804141998291 s
 ```
-
 
 ## Troubleshooting
 

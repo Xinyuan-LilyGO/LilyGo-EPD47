@@ -1,4 +1,11 @@
+/* Hello World Example
 
+   This example code is in the Public Domain (or CC0 licensed, at your option.)
+
+   Unless required by applicable law or agreed to in writing, this
+   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+   CONDITIONS OF ANY KIND, either express or implied.
+*/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -15,22 +22,21 @@
 #include "esp_task_wdt.h"
 
 #include "epd_driver.h"
-#ifdef ARDUINO
 #include "libjpeg/libjpeg.h"
-#else
-#include "libjpeg.h"
-#endif
 #include "ed047tc1.h"
-#ifdef ARDUINO
-#include "./main/cmd.h"
-#else
 #include "cmd.h"
-#endif
 
+#if defined(CONFIG_IDF_TARGET_ESP32)
 #define GPIO_MISO 12
 #define GPIO_MOSI 13
 #define GPIO_SCLK 14
 #define GPIO_CS   15
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#define GPIO_MISO 45
+#define GPIO_MOSI 10
+#define GPIO_SCLK 48
+#define GPIO_CS   39
+#endif
 
 #define RCV_HOST SPI2_HOST
 
@@ -52,9 +58,6 @@ typedef struct ts_EPDcmd
     uint8_t data[4096];
 } ts_EPDcmd;
 
-/**
- * 
- */
 typedef struct epd_reg_t
 {
     uint32_t address_reg;    // 数据保存的地址
@@ -71,8 +74,6 @@ te_epd_status epd_status = E_EPD_STATUS_SLEEP;
 static QueueHandle_t cmd_queue;
 
 epd_reg_t epd_reg;
-
-
 
 void unpack_cmd(uint8_t data)
 {
@@ -313,12 +314,13 @@ void cmd_process(void *args)
                     esp_task_wdt_reset();
                     if (epd_status == E_EPD_STATUS_LD_JPEG)
                     {
-                        show_jpg_from_buff(&data_map[epd_reg.address_reg], cur_ptr - &data_map[epd_reg.address_reg]);
+                        // show_jpg_from_buff(&data_map[epd_reg.address_reg], cur_ptr - &data_map[epd_reg.address_reg]);
+                        show_jpg_from_buff(&data_map[epd_reg.address_reg], cur_ptr - &data_map[epd_reg.address_reg], epd_full_screen());
                     }
                     else
                     {
                         printf("show_area_jpg_from_buff\n");
-                        show_area_jpg_from_buff(&data_map[epd_reg.address_reg], cur_ptr - &data_map[epd_reg.address_reg], epd_reg.area);
+                        show_jpg_from_buff(&data_map[epd_reg.address_reg], cur_ptr - &data_map[epd_reg.address_reg], epd_reg.area);
                     }
                     epd_status = E_EPD_STATUS_RUN;
                 }
@@ -338,9 +340,8 @@ void cmd_process(void *args)
 }
 
 
-
-
-void IRAM_ATTR spi_slave_trans_done(spi_slave_transaction_t* trans) {
+void IRAM_ATTR spi_slave_trans_done(spi_slave_transaction_t* trans)
+{
     // printf("[callback] SPI slave transaction finished\n");
     // ((Slave*)trans->user)->results.push_back(trans->trans_len);
     // ((Slave*)trans->user)->transactions.pop_front();
@@ -348,13 +349,9 @@ void IRAM_ATTR spi_slave_trans_done(spi_slave_transaction_t* trans) {
 
 WORD_ALIGNED_ATTR char recvbuf[4097] = "";
 
-#ifdef ARDUINO
-void loop()
-#else
-void main_loop(void)
-#endif
+void loop(void)
 {
-    esp_err_t ret;
+    // esp_err_t ret;
     spi_slave_transaction_t t;
     memset(&t, 0, sizeof(t));
 
@@ -373,7 +370,7 @@ void main_loop(void)
         .post_setup_cb callback that is called as soon as a transaction is ready, to let the master know it is free to transfer
         data.
         */
-        ret = spi_slave_transmit(SPI2_HOST, &t, portMAX_DELAY);
+        spi_slave_transmit(SPI2_HOST, &t, portMAX_DELAY);
         printf("%lld recv byte: %d\n", esp_timer_get_time(), t.trans_len / 8);
         for (size_t i = 0; i < (t.trans_len / 8); i++)
         {
@@ -382,14 +379,9 @@ void main_loop(void)
     }
 }
 
-#ifdef ARDUINO
-void setup()
-#else
-void app_main(void)
-#endif
+
+void setup(void)
 {
-    esp_err_t ret;
-    int i = 0;
     TaskHandle_t t1;
 
     data_map = (uint8_t *)heap_caps_malloc(540 * 960, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
@@ -397,17 +389,18 @@ void app_main(void)
     memset(data_map, 0, 540 * 960);
 
     //Configuration for the SPI bus
-    spi_bus_config_t buscfg = {
-        .mosi_io_num = GPIO_MOSI,
-        .miso_io_num = -1,
-        .sclk_io_num = GPIO_SCLK,
-        .quadwp_io_num = -1,
-        .quadhd_io_num = -1,
-        .max_transfer_sz = 4096
-    };
+    spi_bus_config_t buscfg;
+    memset(&buscfg, 0, sizeof(buscfg));
+    buscfg.mosi_io_num = GPIO_MOSI;
+    buscfg.miso_io_num = -1;
+    buscfg.sclk_io_num = GPIO_SCLK;
+    buscfg.quadwp_io_num = -1;
+    buscfg.quadhd_io_num = -1;
+    buscfg.max_transfer_sz = 4096;
 
     //Configuration for the SPI slave interface
     spi_slave_interface_config_t slvcfg;
+    memset(&slvcfg, 0, sizeof(slvcfg));
     slvcfg.mode = 3;
     slvcfg.spics_io_num = GPIO_CS;
     slvcfg.queue_size = 8;
@@ -423,7 +416,7 @@ void app_main(void)
     cmd_queue = xQueueCreate(8, sizeof(ts_EPDcmd));
     xTaskCreatePinnedToCore((void (*)(void *))cmd_process,
                              "cmd",
-                             8000,
+                             8192,
                              NULL,
                              10,
                              &t1,
@@ -433,9 +426,7 @@ void app_main(void)
     ESP_ERROR_CHECK(spi_slave_initialize(SPI2_HOST, &buscfg, &slvcfg, SPI_DMA_CH_AUTO));
 
     epd_init();
-    libjpeg_init(data_map);
+    libjpeg_init();
 
-#ifndef ARDUINO
-    main_loop();
-#endif
+    // main_loop();
 }

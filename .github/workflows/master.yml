@@ -1,22 +1,14 @@
-name: PlatformIO CI
+name: Library CI
 
 on:
   push:
-    paths-ignore:
-      - "3D_file/**"
-      - "schematic/**"
-      - "scripts/**"
-      - "Waveform_header/**"
-      - '**.md'
-      - '**.MD'
+    paths:
+      - "src/**"
+      - ".github/workflows/master.yml"
   pull_request:
-    paths-ignore:
-      - "3D_file/**"
-      - "schematic/**"
-      - "scripts/**"
-      - "Waveform_header/**"
-      - '**.md'
-      - '**.MD'
+    paths:
+      - "src/**"
+      - ".github/workflows/master.yml"
 
 jobs:
   button:
@@ -220,4 +212,31 @@ jobs:
     - name: Run PlatformIO
       run: |
         cd examples/touchtest
+        pio run
+
+  wifi_sync:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    - name: Cache PlatformIO
+      uses: actions/cache@v2
+      with:
+        path: ~/.platformio
+        key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+    - name: Set up Python
+      uses: actions/setup-python@v2
+    - name: Install PlatformIO
+      run: |
+        python -m pip install --upgrade pip
+        pip install --upgrade platformio
+    - name: Run PlatformIO
+      run: |
+        cd examples/wifi_sync
         pio run

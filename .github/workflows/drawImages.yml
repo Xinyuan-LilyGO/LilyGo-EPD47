@@ -1,0 +1,39 @@
+name: drawImages CI
+
+on:
+  push:
+    paths:
+      - "examples/drawImages/**"
+      - ".github/workflows/drawImages.yml"
+  pull_request:
+    paths:
+      - "examples/drawImages/**"
+      - ".github/workflows/drawImages.yml"
+
+jobs:
+  drawImages:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    - name: Cache PlatformIO
+      uses: actions/cache@v2
+      with:
+        path: ~/.platformio
+        key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+    - name: Set up Python
+      uses: actions/setup-python@v2
+    - name: Install PlatformIO
+      run: |
+        python -m pip install --upgrade pip
+        pip install --upgrade platformio
+    - name: Run PlatformIO
+      run: |
+        cd examples/drawImages
+        pio run

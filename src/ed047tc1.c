@@ -96,7 +96,7 @@ static void IRAM_ATTR push_cfg(epd_config_register_t *cfg)
 }
 
 
-void IRAM_ATTR busy_delay(uint32_t cycles)
+inline static void IRAM_ATTR busy_delay(uint32_t cycles)
 {
     volatile uint64_t counts = XTHAL_GET_CCOUNT() + cycles;
     while (XTHAL_GET_CCOUNT() < counts) ;
@@ -232,7 +232,9 @@ void IRAM_ATTR epd_output_row(uint32_t output_time_dus)
     pulse_ckv_ticks(output_time_dus, 50, false);
 
     i2s_start_line_output();
+#if USER_I2S_REG
     i2s_switch_buffer();
+#endif
 }
 
 void epd_end_frame()
@@ -245,10 +247,12 @@ void epd_end_frame()
     pulse_ckv_us(1, 1, true);
 }
 
+#if USER_I2S_REG
 void IRAM_ATTR epd_switch_buffer()
 {
     i2s_switch_buffer();
 }
+#endif
 
 uint8_t * IRAM_ATTR epd_get_current_buffer()
 {

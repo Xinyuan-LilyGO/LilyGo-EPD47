@@ -129,7 +129,9 @@ uint8_t * IRAM_ATTR epd_get_current_buffer();
  * @note If the switched-to line buffer is currently in use, this function
  *       blocks until transmission is done.
  */
+#if USER_I2S_REG
 void IRAM_ATTR epd_switch_buffer();
+#endif
 
 #ifdef __cplusplus
 }

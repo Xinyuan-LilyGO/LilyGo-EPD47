@@ -18,11 +18,6 @@
 
 #define FILE_SYSTEM SD
 
-#if CONFIG_IDF_TARGET_ESP32S3
-#include "pcf8563.h"
-#include <Wire.h>
-#endif
-
 #if CONFIG_IDF_TARGET_ESP32
 #define BATT_PIN 36
 #elif CONFIG_IDF_TARGET_ESP32S3
@@ -43,12 +38,6 @@
 #define SD_CS 42
 #else
 #error "Platform not supported"
-#endif
-
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
-PCF8563_Class rtc;
-#define TOUCH_SCL 17
-#define TOUCH_SDA 18
 #endif
 
 #define DBG_OUTPUT_PORT Serial

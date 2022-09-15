@@ -366,6 +366,7 @@ void i2s_bus_init(i2s_bus_config *cfg)
     esp_lcd_i80_bus_config_t bus_config = {
         .dc_gpio_num = cfg->start_pulse,
         .wr_gpio_num = cfg->clock,
+        .clk_src = LCD_CLK_SRC_PLL160M,
         .data_gpio_nums = {
             cfg->data_6,
             cfg->data_7,
@@ -383,7 +384,11 @@ void i2s_bus_init(i2s_bus_config *cfg)
 
     esp_lcd_panel_io_i80_config_t io_config = {
         .cs_gpio_num = -1,
+#ifdef CONFIG_IDF_TARGET_ESP32S3
+        .pclk_hz = 40 * 1000 * 1000,
+#else
         .pclk_hz = 10 * 1000 * 1000,
+#endif
         .trans_queue_depth = 10,
         .dc_levels = {
             .dc_idle_level = 0,

@@ -2,4 +2,4 @@
 Tools
 ******
 
-.. include:: ../../scripts/README.md
+.. include:: ../../scripts/README.MD

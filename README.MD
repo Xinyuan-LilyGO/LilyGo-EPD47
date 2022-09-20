@@ -4,6 +4,10 @@
 
 - The driver and sample program are from [vroland/epdiy](https://github.com/vroland/epdiy)
 
+## Documentation
+
+You can use the [T5-4.7 & T5-4.7 Plus Online Documentation](https://t5-47-t5-47-plus.readthedocs.io/en/latest/) to get all information about this project.
+
 ## Quick Start
 
 - Install the [Arduino IDE](https://www.arduino.cc/en/Main/Software). Note: Later instructions may not work if you use Arduino via Flatpak.

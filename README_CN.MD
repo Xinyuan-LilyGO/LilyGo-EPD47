@@ -4,6 +4,10 @@
 
 - 驱动与示例程序来源于[vroland/epdiy](https://github.com/vroland/epdiy)
 
+## 文档
+
+您可以通过 [T5-4.7 & T5-4.7 Plus 在线文档](https://t5-47-t5-47-plus-zh-cn.readthedocs.io/zh_CN/latest/) 获取本项目的所有信息。
+
 ## 快速开始
 
 - 在github中点击"Download ZIP",下载完成后,在Arduino 菜单栏中选择 项目 -> 加载库 -> 添加.ZIP库 

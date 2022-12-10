@@ -9,12 +9,12 @@
 #include <Arduino.h>
 #include "epd_driver.h"
 #include "libjpeg/libjpeg.h"
-#include "firasans.h"
+#include "font/firasans.h"
 #include "esp_adc_cal.h"
 #include <FS.h>
 #include <SPI.h>
 #include <SD.h>
-#include "logo.h"
+#include "image/logo.h"
 #include "pins.h"
 
 #define FILE_SYSTEM SD

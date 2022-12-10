@@ -7,11 +7,11 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "epd_driver.h"
-#include "logo.h"
-#include "firasans.h"
+#include "image/logo.h"
+#include "font/firasans.h"
 #include <Wire.h>
 #include <touch.h>
-#include "lilygo.h"
+#include "image/lilygo.h"
 #include "pins.h"
 
 TouchClass touch;

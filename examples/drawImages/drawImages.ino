@@ -7,9 +7,9 @@
 
 #include <Arduino.h>
 #include "epd_driver.h"
-#include "pic1.h"
-#include "pic2.h"
-#include "pic3.h"
+#include "image/pic1.h"
+#include "image/pic2.h"
+#include "image/pic3.h"
 
 uint8_t *framebuffer;
 
@@ -31,7 +31,7 @@ void update(uint32_t delay_ms)
     volatile uint32_t t1 = millis();
     epd_draw_grayscale_image(epd_full_screen(), framebuffer);
     volatile uint32_t t2 = millis();
-    Serial.printf("EPD draw took %dms.\n", t2 - t1);
+    Serial.printf("EPD draw took %dms.\r\n", t2 - t1);
     epd_poweroff();
     delay(delay_ms);
 }
@@ -42,11 +42,11 @@ void loop()
         .x = 0,
         .y = 0,
         .width = pic1_width,
-        .height =  pic1_height
+        .height = pic1_height
     };
     epd_poweron();
     epd_clear();
-    epd_draw_grayscale_image(area, (uint8_t *) pic1_data);
+    epd_draw_grayscale_image(area, (uint8_t *)pic1_data);
     epd_poweroff();
     delay(3000);
 
@@ -54,9 +54,9 @@ void loop()
         .x = 0,
         .y = 0,
         .width = pic2_width,
-        .height =  pic2_height
+        .height = pic2_height
     };
-    epd_copy_to_framebuffer(area1, (uint8_t *) pic2_data, framebuffer);
+    epd_copy_to_framebuffer(area1, (uint8_t *)pic2_data, framebuffer);
 
     update(3000);
 
@@ -64,9 +64,9 @@ void loop()
         .x = 0,
         .y = 0,
         .width = pic3_width,
-        .height =  pic3_height
+        .height = pic3_height
     };
-    epd_copy_to_framebuffer(area2, (uint8_t *) pic3_data, framebuffer);
+    epd_copy_to_framebuffer(area2, (uint8_t *)pic3_data, framebuffer);
 
     update(3000);
 }

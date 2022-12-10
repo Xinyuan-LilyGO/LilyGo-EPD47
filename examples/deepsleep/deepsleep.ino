@@ -11,49 +11,16 @@
 #include <SD.h>
 #include "logo.h"
 #include <touch.h>
+#include "pins.h"
 
 // #define USING_TOUCH_PANEL
 
-#if CONFIG_IDF_TARGET_ESP32S3
+#if defined(T5_47_PLUS)
 #include "pcf8563.h"
 #include <Wire.h>
 #endif
 
-#if CONFIG_IDF_TARGET_ESP32
-#define BATT_PIN            36
-#elif CONFIG_IDF_TARGET_ESP32S3
-#define BATT_PIN            14
-#else
-#error "Platform not supported"
-#endif
-
-#if defined(CONFIG_IDF_TARGET_ESP32)
-#define SD_MISO             12
-#define SD_MOSI             13
-#define SD_SCLK             14
-#define SD_CS               15
-#define BUTTON_1            34
-#define BUTTON_2            35
-#define BUTTON_3            39
-#define BUTTON_PIN_BITMASK  GPIO_SEL_34
-#define TOUCH_SCL           14
-#define TOUCH_SDA           15
-#define TOUCH_INT           13
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
-#define SD_MISO             16
-#define SD_MOSI             15
-#define SD_SCLK             11
-#define SD_CS               42
-#define BUTTON_1            0
-#define BUTTON_PIN_BITMASK  GPIO_SEL_0
-#define TOUCH_SCL           17
-#define TOUCH_SDA           18
-#define TOUCH_INT           47
-#else
-#error "Platform not supported"
-#endif
-
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(T5_47_PLUS)
 PCF8563_Class rtc;
 #endif
 
@@ -90,25 +57,34 @@ void setup()
 
     // Correct the ADC reference voltage
     esp_adc_cal_characteristics_t adc_chars;
-#ifdef CONFIG_IDF_TARGET_ESP32
-    esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
+#if defined(T5_47)
+    esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
+        ADC_UNIT_1,
+        ADC_ATTEN_DB_11,
+        ADC_WIDTH_BIT_12,
+        1100,
+        &adc_chars
+    );
 #else
-    esp_adc_cal_value_t val_type = esp_adc_cal_characterize(ADC_UNIT_2, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
+    esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
+        ADC_UNIT_2, 
+        ADC_ATTEN_DB_11, 
+        ADC_WIDTH_BIT_12, 
+        1100, 
+        &adc_chars
+    );
 #endif
     if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) {
         Serial.printf("eFuse Vref:%u mV", adc_chars.vref);
         vref = adc_chars.vref;
     }
 
-
     Wire.begin(TOUCH_SDA, TOUCH_SCL);
-
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
     rtc.begin();
     rtc.setDateTime(2022, 6, 30, 0, 0, 0);
 #endif
-
 
 #if defined(USING_TOUCH_PANEL)
     if (!touch.begin()) {
@@ -167,6 +143,7 @@ void setup()
     epd_poweroff();
 }
 
+
 void loop()
 {
     // When reading the battery voltage, POWER_EN must be turned on
@@ -175,7 +152,7 @@ void loop()
     uint16_t v = analogRead(BATT_PIN);
     float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
     String voltage = "➸ Voltage: " + String(battery_voltage) + "V";
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(T5_47_PLUS)
     voltage = voltage + String(" (") + rtc.formatDateTime(PCF_TIMEFORMAT_YYYY_MM_DD_H_M_S) + String(")");
 #endif
     Serial.println(voltage);
@@ -183,7 +160,7 @@ void loop()
     Rect_t area = {
         .x = 200,
         .y = 460,
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(T5_47_PLUS)
         .width = 700,
 #else
         .width = 320,
@@ -195,7 +172,6 @@ void loop()
     int cursor_y = 500;
     epd_clear_area(area);
     writeln((GFXfont *)&FiraSans, (char *)voltage.c_str(), &cursor_x, &cursor_y, NULL);
-
 
     /**
      * There are two ways to close

@@ -8,25 +8,12 @@
 #include "Button2.h"
 #include "lilygo.h"
 #include "logo.h"
+#include "pins.h"
 
-#if defined(CONFIG_IDF_TARGET_ESP32)
-#define BATT_PIN            36
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
-#define BATT_PIN            14
-#endif
-
-#if defined(CONFIG_IDF_TARGET_ESP32)
-#define BUTTON_1            34
-#define BUTTON_2            35
-#define BUTTON_3            39
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
-#define BUTTON_1            21
-#endif
-
-Button2  btn1(BUTTON_1);
-#if defined(CONFIG_IDF_TARGET_ESP32)
-Button2  btn2(BUTTON_2);
-Button2  btn3(BUTTON_3);
+Button2 btn1(BUTTON_1);
+#if defined(T5_47)
+Button2 btn2(BUTTON_2);
+Button2 btn3(BUTTON_3);
 #endif
 
 uint8_t *framebuffer;
@@ -85,10 +72,10 @@ void displayInfo(void)
         epd_clear_area(area1);
         write_string((GFXfont *)&FiraSans, "DeepSleep", &cursor_x, &cursor_y, NULL);
         epd_poweroff_all();
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(T5_47)
         // Set to wake up by GPIO39
         esp_sleep_enable_ext1_wakeup(GPIO_SEL_39, ESP_EXT1_WAKEUP_ALL_LOW);
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#elif defined(T5_47_PLUS)
         esp_sleep_enable_ext1_wakeup(GPIO_SEL_21, ESP_EXT1_WAKEUP_ALL_LOW);
 #endif
         esp_deep_sleep_start();
@@ -123,7 +110,7 @@ void setup()
     memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
 
     btn1.setPressedHandler(buttonPressed);
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(T5_47)
     btn2.setPressedHandler(buttonPressed);
     btn3.setPressedHandler(buttonPressed);
 #endif
@@ -152,21 +139,19 @@ void setup()
     epd_copy_to_framebuffer(area, (uint8_t *) lilygo_data, framebuffer);
 
     epd_draw_rect(10, 20, EPD_WIDTH - 20, EPD_HEIGHT / 2 + 80, 0, framebuffer);
-
     epd_draw_grayscale_image(epd_full_screen(), framebuffer);
-
     epd_poweroff();
-
 }
+
 
 void loop()
 {
     btn1.loop();
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(T5_47_PLUS)
     delay(20);
     // esp_task_wdt_reset();
 #endif
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(T5_47)
     btn2.loop();
     btn3.loop();
 #endif

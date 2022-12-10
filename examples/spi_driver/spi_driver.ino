@@ -25,18 +25,7 @@
 #include "libjpeg/libjpeg.h"
 #include "ed047tc1.h"
 #include "cmd.h"
-
-#if defined(CONFIG_IDF_TARGET_ESP32)
-#define GPIO_MISO 12
-#define GPIO_MOSI 13
-#define GPIO_SCLK 14
-#define GPIO_CS   15
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
-#define GPIO_MISO 45
-#define GPIO_MOSI 10
-#define GPIO_SCLK 48
-#define GPIO_CS   39
-#endif
+#include "pins.h"
 
 #define RCV_HOST SPI2_HOST
 

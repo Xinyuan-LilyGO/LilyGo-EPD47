@@ -12,16 +12,8 @@
 #include <Wire.h>
 #include <touch.h>
 #include "lilygo.h"
+#include "pins.h"
 
-#if defined(CONFIG_IDF_TARGET_ESP32)
-#define TOUCH_SCL   14
-#define TOUCH_SDA   15
-#define TOUCH_INT   13
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
-#define TOUCH_SCL   17
-#define TOUCH_SDA   18
-#define TOUCH_INT   47
-#endif
 TouchClass touch;
 uint8_t *framebuffer = NULL;
 
@@ -170,10 +162,10 @@ void loop()
 
                 // esp_sleep_enable_ext1_wakeup(GPIO_SEL_13, ESP_EXT1_WAKEUP_ANY_HIGH);
 
-#if defined(CONFIG_IDF_TARGET_ESP32)
+#if defined(T5_47)
                 // Set to wake up by GPIO39
                 esp_sleep_enable_ext1_wakeup(GPIO_SEL_39, ESP_EXT1_WAKEUP_ALL_LOW);
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#elif defined(T5_47_PLUS)
                 esp_sleep_enable_ext1_wakeup(GPIO_SEL_21, ESP_EXT1_WAKEUP_ALL_LOW);
 #endif
                 esp_deep_sleep_start();
@@ -191,4 +183,5 @@ void loop()
             }
         }
     }
+    delay(10);
 }

@@ -15,41 +15,9 @@
 #include <SPI.h>
 #include <SD.h>
 #include "logo.h"
+#include "pins.h"
 
 #define FILE_SYSTEM SD
-
-#if CONFIG_IDF_TARGET_ESP32S3
-#include "pcf8563.h"
-#include <Wire.h>
-#endif
-
-#if CONFIG_IDF_TARGET_ESP32
-#define BATT_PIN 36
-#elif CONFIG_IDF_TARGET_ESP32S3
-#define BATT_PIN 14
-#else
-#error "Platform not supported"
-#endif
-
-#if defined(CONFIG_IDF_TARGET_ESP32)
-#define SD_MISO 12
-#define SD_MOSI 13
-#define SD_SCLK 14
-#define SD_CS 15
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
-#define SD_MISO 16
-#define SD_MOSI 15
-#define SD_SCLK 11
-#define SD_CS 42
-#else
-#error "Platform not supported"
-#endif
-
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
-PCF8563_Class rtc;
-#define TOUCH_SCL 17
-#define TOUCH_SDA 18
-#endif
 
 #define DBG_OUTPUT_PORT Serial
 

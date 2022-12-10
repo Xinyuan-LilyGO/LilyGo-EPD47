@@ -4,12 +4,12 @@
 
 #include <Arduino.h>
 #include "epd_driver.h"
-#include "firasans.h"
+#include "font/firasans.h"
 #include "esp_adc_cal.h"
 #include <FS.h>
 #include <SPI.h>
 #include <SD.h>
-#include "logo.h"
+#include "image/logo.h"
 #include <touch.h>
 #include "pins.h"
 
@@ -24,14 +24,10 @@
 PCF8563_Class rtc;
 #endif
 
-int vref = 1100;
-
+static int vref = 1100;
 TouchClass touch;
 
-void print_wakeup_reason();
-
-void setup()
-{
+void setup() {
     Serial.begin(115200);
     delay(1000);
 
@@ -52,10 +48,13 @@ void setup()
         snprintf(buf, 128, "➸ No detected SdCard");
     } else {
         Serial.println("SD init success");
-        snprintf(buf, 128, "➸ Detected SdCard insert:%.2f GB", SD.cardSize() / 1024.0 / 1024.0 / 1024.0);
+        snprintf(buf, 128,
+            "➸ Detected SdCard insert:%.2f GB",
+            SD.cardSize() / 1024.0 / 1024.0 / 1024.0
+        );
     }
 
-    // Correct the ADC reference voltage
+    /** Correct the ADC reference voltage */
     esp_adc_cal_characteristics_t adc_chars;
 #if defined(T5_47)
     esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
@@ -67,15 +66,15 @@ void setup()
     );
 #else
     esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
-        ADC_UNIT_2, 
-        ADC_ATTEN_DB_11, 
-        ADC_WIDTH_BIT_12, 
-        1100, 
+        ADC_UNIT_2,
+        ADC_ATTEN_DB_11,
+        ADC_WIDTH_BIT_12,
+        1100,
         &adc_chars
     );
 #endif
     if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) {
-        Serial.printf("eFuse Vref:%u mV", adc_chars.vref);
+        Serial.printf("eFuse Vref: %umV\r\n", adc_chars.vref);
         vref = adc_chars.vref;
     }
 
@@ -144,11 +143,10 @@ void setup()
 }
 
 
-void loop()
-{
-    // When reading the battery voltage, POWER_EN must be turned on
+void loop() {
+    /** When reading the battery voltage, POWER_EN must be turned on */
     epd_poweron();
-    delay(10); // Make adc measurement more accurate
+    delay(10); /** Make adc measurement more accurate */
     uint16_t v = analogRead(BATT_PIN);
     float battery_voltage = ((float)v / 4095.0) * 2.0 * 3.3 * (vref / 1000.0);
     String voltage = "➸ Voltage: " + String(battery_voltage) + "V";
@@ -175,7 +173,8 @@ void loop()
 
     /**
      * There are two ways to close
-     * It will turn off the power of the ink screen, but cannot turn off the blue LED light.
+     * It will turn off the power of the ink screen,
+     * but cannot turn off the blue LED light.
      */
     // epd_poweroff();
 
@@ -185,8 +184,7 @@ void loop()
      */
     epd_poweroff_all();
 
-
-    /*
+    /**
     First we configure the wake up source
     We set our ESP32 to wake up for an external trigger.
     There are two types for ESP32, ext0 and ext1 .
@@ -205,22 +203,39 @@ void loop()
     Serial.println("Going to sleep now");
     esp_deep_sleep_start();
     Serial.println("This will never be printed");
-
 }
 
 
-void print_wakeup_reason()
+static void print_wakeup_reason()
 {
-    esp_sleep_wakeup_cause_t wakeup_reason;
-
-    wakeup_reason = esp_sleep_get_wakeup_cause();
+    esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
 
     switch (wakeup_reason) {
-    case ESP_SLEEP_WAKEUP_EXT0 : Serial.println("Wakeup caused by external signal using RTC_IO"); break;
-    case ESP_SLEEP_WAKEUP_EXT1 : Serial.println("Wakeup caused by external signal using RTC_CNTL"); break;
-    case ESP_SLEEP_WAKEUP_TIMER : Serial.println("Wakeup caused by timer"); break;
-    case ESP_SLEEP_WAKEUP_TOUCHPAD : Serial.println("Wakeup caused by touchpad"); break;
-    case ESP_SLEEP_WAKEUP_ULP : Serial.println("Wakeup caused by ULP program"); break;
-    default : Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason); break;
+        case ESP_SLEEP_WAKEUP_EXT0:
+            Serial.println("Wakeup caused by external signal using RTC_IO");
+        break;
+
+        case ESP_SLEEP_WAKEUP_EXT1:
+            Serial.println("Wakeup caused by external signal using RTC_CNTL");
+        break;
+
+        case ESP_SLEEP_WAKEUP_TIMER:
+            Serial.println("Wakeup caused by timer");
+        break;
+
+        case ESP_SLEEP_WAKEUP_TOUCHPAD:
+            Serial.println("Wakeup caused by touchpad");
+        break;
+
+        case ESP_SLEEP_WAKEUP_ULP:
+            Serial.println("Wakeup caused by ULP program");
+        break;
+
+        default:
+            Serial.printf(
+                "Wakeup was not caused by deep sleep: %d\r\n",
+                wakeup_reason
+            );
+        break;
     }
 }

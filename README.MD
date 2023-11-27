@@ -14,8 +14,8 @@ You can use the [T5-4.7 & T5-4.7 Plus Online Documentation](https://t5-47-t5-47-
 - Install the latest [espressif/arduino-esp32](https://github.com/espressif/arduino-esp32) package in the IDE, version >= 1.05
 - Download a zipfile from github using the "Download ZIP" button and install it using the IDE ("Sketch" -> "Include Library" -> "Add .ZIP Library...", OR:
 - Clone this git repository into your sketchbook/libraries folder. For more info, see https://www.arduino.cc/en/Guide/Libraries
-- Choose `ESP32 Dev Module` for the board
-- Tools -> PSRAM -> `Enable`
+- Choose `ESP32 Dev S3 Module` for the board
+- Tools -> PSRAM -> `Enable` ->`OPI``
 - ("File" -> "Examples" -> "LilyGoEPD47" -> "demo") in the Arduino IDE
 - Select the correct port and click upload
 - Please refer to [Script Instructions](./scripts/README.MD) for picture and text generation 

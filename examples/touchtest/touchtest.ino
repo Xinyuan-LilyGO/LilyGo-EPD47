@@ -1,3 +1,8 @@
+/**
+ * @note 
+ * * The touch is only suitable for the L58 driver chip, 
+ * * similar to the touch cover of Samsung S4, and will be available before 2022
+ */
 #ifndef BOARD_HAS_PSRAM
 #error "Please enable PSRAM !!!"
 #endif

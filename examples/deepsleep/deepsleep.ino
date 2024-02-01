@@ -4,12 +4,12 @@
 
 #include <Arduino.h>
 #include "epd_driver.h"
-#include "font/firasans.h"
+#include "firasans.h"
 #include "esp_adc_cal.h"
 #include <FS.h>
 #include <SPI.h>
 #include <SD.h>
-#include "image/logo.h"
+#include "logo.h"
 #include <touch.h>
 #include "pins.h"
 
@@ -27,7 +27,8 @@ PCF8563_Class rtc;
 static int vref = 1100;
 TouchClass touch;
 
-void setup() {
+void setup()
+{
     Serial.begin(115200);
     delay(1000);
 
@@ -49,29 +50,29 @@ void setup() {
     } else {
         Serial.println("SD init success");
         snprintf(buf, 128,
-            "➸ Detected SdCard insert:%.2f GB",
-            SD.cardSize() / 1024.0 / 1024.0 / 1024.0
-        );
+                 "➸ Detected SdCard insert:%.2f GB",
+                 SD.cardSize() / 1024.0 / 1024.0 / 1024.0
+                );
     }
 
     /** Correct the ADC reference voltage */
     esp_adc_cal_characteristics_t adc_chars;
 #if defined(T5_47)
     esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
-        ADC_UNIT_1,
-        ADC_ATTEN_DB_11,
-        ADC_WIDTH_BIT_12,
-        1100,
-        &adc_chars
-    );
+                                       ADC_UNIT_1,
+                                       ADC_ATTEN_DB_11,
+                                       ADC_WIDTH_BIT_12,
+                                       1100,
+                                       &adc_chars
+                                   );
 #else
     esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
-        ADC_UNIT_2,
-        ADC_ATTEN_DB_11,
-        ADC_WIDTH_BIT_12,
-        1100,
-        &adc_chars
-    );
+                                       ADC_UNIT_2,
+                                       ADC_ATTEN_DB_11,
+                                       ADC_WIDTH_BIT_12,
+                                       1100,
+                                       &adc_chars
+                                   );
 #endif
     if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) {
         Serial.printf("eFuse Vref: %umV\r\n", adc_chars.vref);
@@ -143,7 +144,8 @@ void setup() {
 }
 
 
-void loop() {
+void loop()
+{
     /** When reading the battery voltage, POWER_EN must be turned on */
     epd_poweron();
     delay(10); /** Make adc measurement more accurate */
@@ -211,31 +213,31 @@ static void print_wakeup_reason()
     esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
 
     switch (wakeup_reason) {
-        case ESP_SLEEP_WAKEUP_EXT0:
-            Serial.println("Wakeup caused by external signal using RTC_IO");
+    case ESP_SLEEP_WAKEUP_EXT0:
+        Serial.println("Wakeup caused by external signal using RTC_IO");
         break;
 
-        case ESP_SLEEP_WAKEUP_EXT1:
-            Serial.println("Wakeup caused by external signal using RTC_CNTL");
+    case ESP_SLEEP_WAKEUP_EXT1:
+        Serial.println("Wakeup caused by external signal using RTC_CNTL");
         break;
 
-        case ESP_SLEEP_WAKEUP_TIMER:
-            Serial.println("Wakeup caused by timer");
+    case ESP_SLEEP_WAKEUP_TIMER:
+        Serial.println("Wakeup caused by timer");
         break;
 
-        case ESP_SLEEP_WAKEUP_TOUCHPAD:
-            Serial.println("Wakeup caused by touchpad");
+    case ESP_SLEEP_WAKEUP_TOUCHPAD:
+        Serial.println("Wakeup caused by touchpad");
         break;
 
-        case ESP_SLEEP_WAKEUP_ULP:
-            Serial.println("Wakeup caused by ULP program");
+    case ESP_SLEEP_WAKEUP_ULP:
+        Serial.println("Wakeup caused by ULP program");
         break;
 
-        default:
-            Serial.printf(
-                "Wakeup was not caused by deep sleep: %d\r\n",
-                wakeup_reason
-            );
+    default:
+        Serial.printf(
+            "Wakeup was not caused by deep sleep: %d\r\n",
+            wakeup_reason
+        );
         break;
     }
 }

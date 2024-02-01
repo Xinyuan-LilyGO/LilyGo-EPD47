@@ -7,9 +7,9 @@
 
 #include <Arduino.h>
 #include "epd_driver.h"
-#include "image/pic1.h"
-#include "image/pic2.h"
-#include "image/pic3.h"
+#include "src/pic1.h"
+#include "src/pic2.h"
+#include "src/pic3.h"
 
 uint8_t *framebuffer;
 

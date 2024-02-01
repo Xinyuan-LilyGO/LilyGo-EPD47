@@ -1,6 +1,6 @@
 /**
- * @note 
- * * The touch is only suitable for the L58 driver chip, 
+ * @note
+ * * The touch is only suitable for the L58 driver chip,
  * * similar to the touch cover of Samsung S4, and will be available before 2022
  */
 #ifndef BOARD_HAS_PSRAM
@@ -12,11 +12,11 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "epd_driver.h"
-#include "image/logo.h"
-#include "font/firasans.h"
+#include "logo.h"
+#include "firasans.h"
 #include <Wire.h>
 #include <touch.h>
-#include "image/lilygo.h"
+#include "lilygo.h"
 #include "pins.h"
 
 TouchClass touch;

@@ -1,6 +1,6 @@
 /**
  * @note
- * * The touch is only suitable for the GT911 driver chip . 
+ * * The touch is only suitable for the GT911 driver chip .
  */
 #ifndef BOARD_HAS_PSRAM
 #error "Please enable PSRAM !!!"
@@ -11,10 +11,10 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "epd_driver.h"
-#include "image/logo.h"
-#include "font/firasans.h"
+#include "logo.h"
+#include "firasans.h"
 #include <Wire.h>
-#include "image/lilygo.h"
+#include "lilygo.h"
 #include "pins.h"
 #include <TouchDrvGT911.hpp>
 
@@ -74,8 +74,8 @@ void setup()
     Wire.begin(TOUCH_SDA, TOUCH_SCL);
 
     /*
-    * The touch reset pin uses hardware pull-up, 
-    * and the function of setting the I2C device address cannot be used. 
+    * The touch reset pin uses hardware pull-up,
+    * and the function of setting the I2C device address cannot be used.
     * Use scanning to obtain the touch device address.*/
     uint8_t touchAddress = 0;
     Wire.beginTransmission(0x14);

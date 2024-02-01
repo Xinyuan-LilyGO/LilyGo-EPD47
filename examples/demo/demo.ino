@@ -4,12 +4,12 @@
 
 #include <Arduino.h>
 #include "epd_driver.h"
-#include "font/firasans.h"
+#include "firasans.h"
 #include "esp_adc_cal.h"
 #include <FS.h>
 #include <SPI.h>
 #include <SD.h>
-#include "image/logo.h"
+#include "logo.h"
 #include "pins.h"
 
 #if defined(T5_47_PLUS)
@@ -45,29 +45,29 @@ void setup()
     } else {
         Serial.println("SD init success");
         snprintf(buf, 128,
-            "➸ Detected SdCard insert:%.2f GB",
-            SD.cardSize() / 1024.0 / 1024.0 / 1024.0
-        );
+                 "➸ Detected SdCard insert:%.2f GB",
+                 SD.cardSize() / 1024.0 / 1024.0 / 1024.0
+                );
     }
 
     // Correct the ADC reference voltage
     esp_adc_cal_characteristics_t adc_chars;
 #if defined(T5_47)
     esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
-        ADC_UNIT_1,
-        ADC_ATTEN_DB_11,
-        ADC_WIDTH_BIT_12,
-        1100,
-        &adc_chars
-    );
+                                       ADC_UNIT_1,
+                                       ADC_ATTEN_DB_11,
+                                       ADC_WIDTH_BIT_12,
+                                       1100,
+                                       &adc_chars
+                                   );
 #else
     esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
-        ADC_UNIT_2,
-        ADC_ATTEN_DB_11,
-        ADC_WIDTH_BIT_12,
-        1100,
-        &adc_chars
-    );
+                                       ADC_UNIT_2,
+                                       ADC_ATTEN_DB_11,
+                                       ADC_WIDTH_BIT_12,
+                                       1100,
+                                       &adc_chars
+                                   );
 #endif
     if (val_type == ESP_ADC_CAL_VAL_EFUSE_VREF) {
         Serial.printf("eFuse Vref: %umV\r\n", adc_chars.vref);

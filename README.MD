@@ -1,7 +1,7 @@
 <h1 align = "center">🌟LilyGo EPD47 🌟</h1>
 
 ## **English | [中文](./README_CN.MD)**
-
+- **T5-4.7-S3** version is [here](https://github.com/Xinyuan-LilyGO/LilyGo-EPD47/tree/esp32s3)
 - The driver and sample program are from [vroland/epdiy](https://github.com/vroland/epdiy)
 
 ## Documentation

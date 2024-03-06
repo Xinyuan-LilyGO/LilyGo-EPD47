@@ -22,7 +22,7 @@ args = parser.parse_args()
 im = Image.open(args.inputfile)
 # convert to grayscale
 im = im.convert(mode='L')
-im.thumbnail((SCREEN_WIDTH, SCREEN_HEIGHT), Image.ANTIALIAS)
+im.thumbnail((SCREEN_WIDTH, SCREEN_HEIGHT), Image.LANCZOS)
 
 # Write out the output file.
 with open(args.outputfile, 'w') as f:

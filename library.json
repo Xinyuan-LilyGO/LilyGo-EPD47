@@ -1,0 +1,49 @@
+{
+  "name": "LilyGo-EPD47",
+  "version": "1.0.0",
+  "description": "LilyGo epaper 4.7 inches Arduino library",
+  "keywords": "lilygo,epaper",
+  "authors": [
+    {
+      "name": "Xinyuan-LilyGO",
+      "url": "https://github.com/Xinyuan-LilyGO"
+    },
+    {
+      "name": "LewisHe",
+      "url": "https://github.com/lewisxhe",
+      "maintainer": true
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Xinyuan-LilyGO/LilyGo-EPD47.git"
+  },
+  "homepage": "https://github.com/Xinyuan-LilyGO/LilyGo-EPD47",
+  "export": {
+    "include": [
+      "LICENSE",
+      "library.json",
+      "library.properties",
+      "README.md",
+      "keywords.txt",
+      "src/*",
+      "examples/*"
+    ]
+  },
+  "dependencies": [
+    {
+      "owner": "lennarthennigs",
+      "name": "Button2",
+      "version": "2.3.2"
+    },
+    {
+      "owner": "lewisxhe",
+      "name": "SensorLib",
+      "version": "0.1.9"
+    }
+  ],
+  "examples": ["examples/*/*.ino"],
+  "frameworks": ["arduino"],
+  "platforms": "esp32",
+  "headers": "epd_driver.h"
+}

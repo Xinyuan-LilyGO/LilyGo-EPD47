@@ -40,11 +40,11 @@ Arduino编译配置
 
 - `T5-4.7 <https://www.aliexpress.us/item/3256801819744140.html>`_
 
-    .. image:: ../../_static/t5-4.7-arduino-config.jpg
+    .. image:: ../../_static/t5-4-7-arduino-config.jpg
 
 - `T5-4.7-Plus <https://www.aliexpress.us/item/3256804461011991.html>`_
 
-    .. image:: ../../_static/t5-4.7-plus-arduino-config.jpg
+    .. image:: ../../_static/t5-4-7-plus-arduino-config.jpg
 
 原理图
 =======

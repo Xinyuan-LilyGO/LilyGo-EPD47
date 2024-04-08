@@ -1,3 +1,24 @@
+/**
+ * @copyright Copyright (c) 2024  Shenzhen Xin Yuan Electronic Technology Co., Ltd
+ * @date      2024-04-05
+ * @note      Arduino Setting
+ *            Tools ->
+ *                  Board:"ESP32S3 Dev Module"
+ *                  USB CDC On Boot:"Enable"
+ *                  USB DFU On Boot:"Disable"
+ *                  Flash Size : "16MB(128Mb)"
+ *                  Flash Mode"QIO 80MHz
+ *                  Partition Scheme:"16M Flash(3M APP/9.9MB FATFS)"
+ *                  PSRAM:"OPI PSRAM"
+ *                  Upload Mode:"UART0/Hardware CDC"
+ *                  USB Mode:"Hardware CDC and JTAG"
+ *  
+ */
+
+#ifndef BOARD_HAS_PSRAM
+#error "Please enable PSRAM, Arduino IDE -> tools -> PSRAM -> OPI !!!"
+#endif
+
 /* Simple firmware for a ESP32 displaying a static image on an EPaper Screen.
  *
  * Write an image into a header file using a 3...2...1...0 format per pixel,
@@ -10,6 +31,7 @@
 #include "src/pic1.h"
 #include "src/pic2.h"
 #include "src/pic3.h"
+#include "utilities.h"
 
 uint8_t *framebuffer;
 
@@ -20,8 +42,14 @@ void setup()
     epd_init();
 
     framebuffer = (uint8_t *)heap_caps_malloc(EPD_WIDTH * EPD_HEIGHT / 2, MALLOC_CAP_SPIRAM);
-    memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
 
+    if (!framebuffer) {
+        Serial.println("alloc memory failed !!!");
+        while (1)
+            ;
+    }
+
+    memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
 }
 
 void update(uint32_t delay_ms)

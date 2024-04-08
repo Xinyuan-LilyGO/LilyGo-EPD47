@@ -1,9 +1,22 @@
 /**
- * @note
- * * The touch is only suitable for the GT911 driver chip .
+ * @copyright Copyright (c) 2024  Shenzhen Xin Yuan Electronic Technology Co., Ltd
+ * @date      2024-04-05
+ * @note      Arduino Setting
+ *            Tools ->
+ *                  Board:"ESP32S3 Dev Module"
+ *                  USB CDC On Boot:"Enable"
+ *                  USB DFU On Boot:"Disable"
+ *                  Flash Size : "16MB(128Mb)"
+ *                  Flash Mode"QIO 80MHz
+ *                  Partition Scheme:"16M Flash(3M APP/9.9MB FATFS)"
+ *                  PSRAM:"OPI PSRAM"
+ *                  Upload Mode:"UART0/Hardware CDC"
+ *                  USB Mode:"Hardware CDC and JTAG"
+ *  
  */
+
 #ifndef BOARD_HAS_PSRAM
-#error "Please enable PSRAM !!!"
+#error "Please enable PSRAM, Arduino IDE -> tools -> PSRAM -> OPI !!!"
 #endif
 
 #include <Arduino.h>
@@ -15,8 +28,8 @@
 #include "firasans.h"
 #include <Wire.h>
 #include "lilygo.h"
-#include "pins.h"
 #include <TouchDrvGT911.hpp>
+#include "utilities.h"
 
 TouchDrvGT911 touch;
 uint8_t *framebuffer = NULL;
@@ -64,6 +77,15 @@ void setup()
 {
     Serial.begin(115200);
 
+
+    framebuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
+    if (!framebuffer) {
+        Serial.println("alloc memory failed !!!");
+        while (1);
+    }
+    memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
+
+
     epd_init();
 
     //* Sleep wakeup must wait one second, otherwise the touch device cannot be addressed
@@ -71,7 +93,11 @@ void setup()
         delay(1000);
     }
 
-    Wire.begin(TOUCH_SDA, TOUCH_SCL);
+    Wire.begin(BOARD_SDA, BOARD_SCL);
+
+    // Assuming that the previous touch was in sleep state, wake it up
+    pinMode(TOUCH_INT, OUTPUT);
+    digitalWrite(TOUCH_INT, HIGH);
 
     /*
     * The touch reset pin uses hardware pull-up,
@@ -93,7 +119,7 @@ void setup()
         }
     }
     touch.setPins(-1, TOUCH_INT);
-    if (!touch.init(Wire,  TOUCH_SDA, TOUCH_SCL, touchAddress )) {
+    if (!touch.begin(Wire, touchAddress, BOARD_SDA, BOARD_SCL )) {
         while (1) {
             Serial.println("Failed to find GT911 - check your wiring!");
             delay(1000);
@@ -105,12 +131,6 @@ void setup()
 
     Serial.println("Started Touchscreen poll...");
 
-    framebuffer = (uint8_t *)ps_calloc(sizeof(uint8_t), EPD_WIDTH * EPD_HEIGHT / 2);
-    if (!framebuffer) {
-        Serial.println("alloc memory failed !!!");
-        while (1);
-    }
-    memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
 
     epd_poweron();
     epd_clear();
@@ -138,6 +158,7 @@ void setup()
     epd_draw_rect(10, 20, EPD_WIDTH - 20, EPD_HEIGHT / 2 + 80, 0, framebuffer);
 
     epd_draw_grayscale_image(epd_full_screen(), framebuffer);
+
     epd_poweroff();
 
 }
@@ -182,23 +203,28 @@ void loop()
             epd_clear_area(area1);
             write_string((GFXfont *)&FiraSans, "DeepSleep", &cursor_x, &cursor_y, NULL);
 
-            //* After calling touch sleep, you cannot wake it up by calling wakeup. You must turn the power off and on again to enable it.
+            // The touch interrupt uses non-RTC-IO, so the touch wake-up function cannot be used to set the touch to sleep
             touch.sleep();
+
             delay(5);
 
-            pinMode(14, INPUT);
-            pinMode(15, INPUT);
+            Wire.end();
+
+            pinMode(BOARD_SDA, OPEN_DRAIN);
+            pinMode(BOARD_SCL, OPEN_DRAIN);
+            pinMode(TOUCH_INT, OPEN_DRAIN);
 
             epd_poweroff_all();
 
-            // esp_sleep_enable_ext1_wakeup(GPIO_SEL_13, ESP_EXT1_WAKEUP_ANY_HIGH);
-
-#if defined(T5_47)
+#if defined(CONFIG_IDF_TARGET_ESP32)
             // Set to wake up by GPIO39
             esp_sleep_enable_ext1_wakeup(GPIO_SEL_39, ESP_EXT1_WAKEUP_ANY_LOW);
-#elif defined(T5_47_PLUS)
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
             esp_sleep_enable_ext1_wakeup(GPIO_SEL_21, ESP_EXT1_WAKEUP_ANY_LOW);
 #endif
+
+
+
             esp_deep_sleep_start();
             break;
         case 4:

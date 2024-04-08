@@ -1,5 +1,22 @@
+/**
+ * @copyright Copyright (c) 2024  Shenzhen Xin Yuan Electronic Technology Co., Ltd
+ * @date      2024-04-05
+ * @note      Arduino Setting
+ *            Tools ->
+ *                  Board:"ESP32S3 Dev Module"
+ *                  USB CDC On Boot:"Enable"
+ *                  USB DFU On Boot:"Disable"
+ *                  Flash Size : "16MB(128Mb)"
+ *                  Flash Mode"QIO 80MHz
+ *                  Partition Scheme:"16M Flash(3M APP/9.9MB FATFS)"
+ *                  PSRAM:"OPI PSRAM"
+ *                  Upload Mode:"UART0/Hardware CDC"
+ *                  USB Mode:"Hardware CDC and JTAG"
+ *  
+ */
+
 #ifndef BOARD_HAS_PSRAM
-#error "Please enable PSRAM !!!"
+#error "Please enable PSRAM, Arduino IDE -> tools -> PSRAM -> OPI !!!"
 #endif
 
 #include <WiFi.h>
@@ -16,7 +33,8 @@
 #include <SD.h>
 #include <FFat.h>
 #include "logo.h"
-#include "pins.h"
+#include "utilities.h"
+
 
 // #define USE_SD
 #define USE_FLASH
@@ -385,7 +403,7 @@ void setup()
     DBG_OUTPUT_PORT.println("HTTP server started");
 
 #if defined(USE_SD)
-    SPI.begin(SD_SCLK, SD_MISO, SD_MOSI, SD_CS);
+    SPI.begin(SD_SCLK, SD_SCLK, SD_MOSI, SD_CS);
     bool rlst = FILE_SYSTEM.begin(SD_CS, SPI);
 #else
     bool rlst = FILE_SYSTEM.begin(true);

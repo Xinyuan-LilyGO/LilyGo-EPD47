@@ -1,5 +1,22 @@
+/**
+ * @copyright Copyright (c) 2024  Shenzhen Xin Yuan Electronic Technology Co., Ltd
+ * @date      2024-04-05
+ * @note      Arduino Setting
+ *            Tools ->
+ *                  Board:"ESP32S3 Dev Module"
+ *                  USB CDC On Boot:"Enable"
+ *                  USB DFU On Boot:"Disable"
+ *                  Flash Size : "16MB(128Mb)"
+ *                  Flash Mode"QIO 80MHz
+ *                  Partition Scheme:"16M Flash(3M APP/9.9MB FATFS)"
+ *                  PSRAM:"OPI PSRAM"
+ *                  Upload Mode:"UART0/Hardware CDC"
+ *                  USB Mode:"Hardware CDC and JTAG"
+ *  
+ */
+
 #ifndef BOARD_HAS_PSRAM
-#error "Please enable PSRAM !!!"
+#error "Please enable PSRAM, Arduino IDE -> tools -> PSRAM -> OPI !!!"
 #endif
 
 #include <Arduino.h>
@@ -8,10 +25,11 @@
 #include "Button2.h"
 #include "lilygo.h"
 #include "logo.h"
-#include "pins.h"
+
 
 Button2 btn1(BUTTON_1);
-#if defined(T5_47)
+
+#if defined(CONFIG_IDF_TARGET_ESP32)
 Button2 btn2(BUTTON_2);
 Button2 btn3(BUTTON_3);
 #endif
@@ -72,11 +90,11 @@ void displayInfo(void)
         epd_clear_area(area1);
         write_string((GFXfont *)&FiraSans, "DeepSleep", &cursor_x, &cursor_y, NULL);
         epd_poweroff_all();
-#if defined(T5_47)
+#if defined(CONFIG_IDF_TARGET_ESP32)
         // Set to wake up by GPIO39
-        esp_sleep_enable_ext1_wakeup(GPIO_SEL_39, ESP_EXT1_WAKEUP_ALL_LOW);
-#elif defined(T5_47_PLUS)
-        esp_sleep_enable_ext1_wakeup(GPIO_SEL_21, ESP_EXT1_WAKEUP_ALL_LOW);
+        esp_sleep_enable_ext1_wakeup(GPIO_SEL_39, ESP_EXT1_WAKEUP_ANY_LOW);
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+        esp_sleep_enable_ext1_wakeup(GPIO_SEL_21, ESP_EXT1_WAKEUP_ANY_LOW);
 #endif
         esp_deep_sleep_start();
         break;
@@ -109,8 +127,10 @@ void setup()
     }
     memset(framebuffer, 0xFF, EPD_WIDTH * EPD_HEIGHT / 2);
 
+
+
     btn1.setPressedHandler(buttonPressed);
-#if defined(T5_47)
+#if defined(CONFIG_IDF_TARGET_ESP32)
     btn2.setPressedHandler(buttonPressed);
     btn3.setPressedHandler(buttonPressed);
 #endif
@@ -147,12 +167,11 @@ void setup()
 void loop()
 {
     btn1.loop();
-#if defined(T5_47_PLUS)
-    delay(20);
-    // esp_task_wdt_reset();
-#endif
-#if defined(T5_47)
+
+#if defined(CONFIG_IDF_TARGET_ESP32)
     btn2.loop();
     btn3.loop();
 #endif
+
+    delay(2);
 }

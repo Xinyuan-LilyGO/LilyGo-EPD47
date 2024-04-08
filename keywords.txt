@@ -1,0 +1,55 @@
+#######################################
+# Syntax Coloring Map For LilyGo-EPD47 By lewis He
+# github:https://github.com/Xinyuan-LilyGO/LilyGo-EPD47
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+DrawMode_t	KEYWORD1
+Rect_t	KEYWORD1
+FontProperties	KEYWORD1
+
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+epd_start_frame	KEYWORD2
+epd_end_frame	KEYWORD2
+epd_output_row	KEYWORD2
+epd_skip	KEYWORD2
+epd_get_current_buffer	KEYWORD2
+epd_switch_buffer	KEYWORD2
+epd_init	KEYWORD2
+epd_poweron	KEYWORD2
+epd_poweroff	KEYWORD2
+epd_poweroff_all	KEYWORD2
+epd_clear_area	KEYWORD2
+epd_clear_area_cycles	KEYWORD2
+epd_push_pixels	KEYWORD2
+epd_draw_grayscale_image	KEYWORD2
+epd_draw_image	KEYWORD2
+epd_draw_frame_1bit	KEYWORD2
+epd_full_screen	KEYWORD2
+epd_copy_to_framebuffer	KEYWORD2
+epd_draw_pixel	KEYWORD2
+epd_draw_hline	KEYWORD2
+epd_draw_vline	KEYWORD2
+epd_draw_circle	KEYWORD2
+epd_fill_circle	KEYWORD2
+epd_draw_rect	KEYWORD2
+epd_write_line	KEYWORD2
+epd_draw_line	KEYWORD2
+epd_draw_triangle	KEYWORD2
+epd_fill_triangle	KEYWORD2
+get_text_bounds	KEYWORD2
+writeln	KEYWORD2
+write_mode	KEYWORD2
+get_glyph	KEYWORD2
+write_string	KEYWORD2
+write_mode	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+

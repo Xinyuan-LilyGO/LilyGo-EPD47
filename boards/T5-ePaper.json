@@ -20,7 +20,7 @@
     "arduino",
     "espidf"
   ],
-  "name": "LILYGO T5-4.7",
+  "name": "LILYGO T5-ePaper-ESP32",
   "upload": {
     "flash_size": "16MB",
     "maximum_ram_size": 4521984,
@@ -28,6 +28,6 @@
     "require_upload_port": true,
     "speed": 460800
   },
-  "url": "https://www.aliexpress.us/item/3256801819744140.html",
+  "url": "https://www.lilygo.cc/products/t5-4-7-inch-e-paper-v2-3",
   "vendor": "LILYGO"
 }

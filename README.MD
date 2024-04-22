@@ -51,7 +51,11 @@ examples/
 ## 4️⃣ Install from Arduino Library Manager (recommended)
 
 1. Install [Arduino IDE](https://www.arduino.cc/en/software)
-2. Install [Arduino ESP32 V 2.0.5 or above and below V3.0](https://docs.espressif.com/projects/arduino-esp32/en/latest/)
+2. Install [Arduino ESP32 V 2.0.5 or above and below V3.0](https://docs.espressif.com/projects/arduino-esp32/en/latest/) ，recommended to use version 2.0.15, the URL is as follows 
+    Steps: Arduino IDE -> Preferences -> Additional boards manager URLs
+    ```url
+    https://espressif.github.io/arduino-esp32/package_esp32_index.json
+    ```
 3. `Sketch` -> `Include Library` -> `Manage Libraries`
 4. `Library Search` -> `LilyGo EPD47` -> `Install` -> `Install ALL`
 5. `File` -> `Examples` -> `LilyGo EPD47` -> `Any Examples`

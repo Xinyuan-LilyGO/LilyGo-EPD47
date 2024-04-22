@@ -1,6 +1,6 @@
 {
   "name": "LilyGo-EPD47",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "LilyGo epaper 4.7 inches Arduino library",
   "keywords": "lilygo,epaper",
   "authors": [

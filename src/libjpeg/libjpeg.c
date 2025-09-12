@@ -14,7 +14,7 @@
 
 // JPG decoder
 #if ESP_IDF_VERSION_MAJOR >= 4 // IDF 4+
-#include "esp32/rom/tjpgd.h"
+#include "esp32s3/rom/tjpgd.h"
 #else // ESP32 Before IDF 4.0
 #include "rom/tjpgd.h"
 #endif
@@ -62,7 +62,7 @@ static void epd_draw_pixel_area(int x, int y, uint8_t color, uint8_t *framebuffe
  * @param buff Pointer to buffer to store the read data
  * @param nd   Number of bytes to read
  */
-static uint32_t feed_buffer(JDEC *jd, uint8_t *buff, uint32_t nd);
+static unsigned int feed_buffer(JDEC *jd, BYTE *buff, unsigned int nd);
 
 /**
  * @brief User defined call-back function to output decoded RGB bitmap in
@@ -72,7 +72,7 @@ static uint32_t feed_buffer(JDEC *jd, uint8_t *buff, uint32_t nd);
  * @param bitmap Bitmap data to be output
  * @param rect   Rectangular region to output
  */
-static uint32_t tjd_output(JDEC *jd, void *bitmap, JRECT *rect);
+static unsigned int tjd_output(JDEC *jd, void *bitmap, JRECT *rect);
 
 /**
  * @brief This function opens jpeg_buf Jpeg image file and primes the decoder
@@ -299,7 +299,7 @@ static void epd_draw_pixel_area(int x, int y, uint8_t color, uint8_t *framebuffe
 }
 
 
-static uint32_t feed_buffer(JDEC *jd, uint8_t *buff, uint32_t nd)
+static unsigned int feed_buffer(JDEC *jd, BYTE *buff, unsigned int nd)
 {
     uint8_t *device = (uint8_t *)jd->device;
     uint32_t count = 0;
@@ -317,7 +317,7 @@ static uint32_t feed_buffer(JDEC *jd, uint8_t *buff, uint32_t nd)
 }
 
 
-static uint32_t tjd_output(JDEC *jd, void *bitmap, JRECT *rect)
+static unsigned int tjd_output(JDEC *jd, void *bitmap, JRECT *rect)
 {
     esp_task_wdt_reset();
 

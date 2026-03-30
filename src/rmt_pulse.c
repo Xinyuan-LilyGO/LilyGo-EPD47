@@ -5,6 +5,7 @@
 
 #include "rmt_pulse.h"
 
+#include <esp_idf_version.h>
 #if ESP_IDF_VERSION_MAJOR >= 5 // IDF 5+ — new RMT TX driver (driver_ng)
 #include <driver/rmt_tx.h>
 #include <driver/rmt_encoder.h>

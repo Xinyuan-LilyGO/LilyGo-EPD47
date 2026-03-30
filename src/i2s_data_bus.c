@@ -5,7 +5,11 @@
 
 #include "i2s_data_bus.h"
 
-#include <driver/periph_ctrl.h>
+#include <esp_idf_version.h>
+#if ESP_IDF_VERSION_MAJOR < 6
+#  include <driver/periph_ctrl.h>
+#  define LEGACY_PERIPH_API
+#endif
 #include <esp_heap_caps.h>
 #include <rom/lldesc.h>
 #include <soc/i2s_reg.h>
@@ -237,7 +241,9 @@ void i2s_bus_init(i2s_bus_config *cfg)
     // Invert word select signal
     gpio_setup_out(cfg->clock, I2S1O_WS_OUT_IDX, true);
 
+#ifdef LEGACY_PERIPH_API
     periph_module_enable(PERIPH_I2S1_MODULE);
+#endif
 
 #ifdef CONFIG_IDF_TARGET_ESP32
     i2s_dev_t *dev = &I2S1;
@@ -419,7 +425,9 @@ void i2s_deinit()
     free((void *)i2s_state.dma_desc_a);
     free((void *)i2s_state.dma_desc_b);
 
+#ifdef LEGACY_PERIPH_API
     periph_module_disable(PERIPH_I2S1_MODULE);
+#endif
 }
 
 /******************************************************************************/

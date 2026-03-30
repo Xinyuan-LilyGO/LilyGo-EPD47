@@ -52,7 +52,7 @@ static uint32_t next_cp(uint8_t **string);
 
 static FontProperties font_properties_default();
 
-static void IRAM_ATTR draw_char(const GFXfont *font,
+static void draw_char(const GFXfont *font,
                                 uint8_t *buffer,
                                 int32_t *cursor_x,
                                 int32_t cursor_y,

@@ -75,20 +75,20 @@ static void write_row(uint32_t output_time_dus);
  */
 static void skip_row(uint8_t pipeline_finish_time);
 
-static void IRAM_ATTR reset_lut(uint8_t *lut_mem, DrawMode_t mode);
+static void reset_lut(uint8_t *lut_mem, DrawMode_t mode);
 
-static void IRAM_ATTR update_LUT(uint8_t *lut_mem, uint8_t k, DrawMode_t mode);
+static void update_LUT(uint8_t *lut_mem, uint8_t k, DrawMode_t mode);
 
 /**
  * @brief bit-shift a buffer `shift` <= 7 bits to the right.
  */
-static void IRAM_ATTR bit_shift_buffer_right(uint8_t *buf, uint32_t len, int32_t shift);
+static void bit_shift_buffer_right(uint8_t *buf, uint32_t len, int32_t shift);
 
-static void IRAM_ATTR nibble_shift_buffer_right(uint8_t *buf, uint32_t len);
+static void nibble_shift_buffer_right(uint8_t *buf, uint32_t len);
 
-static void IRAM_ATTR provide_out(OutputParams *params);
+static void provide_out(OutputParams *params);
 
-static void IRAM_ATTR feed_display(OutputParams *params);
+static void feed_display(OutputParams *params);
 
 static void epd_fill_circle_helper(int32_t x0, int32_t y0, int32_t r, int32_t corners, int32_t delta,
                             uint8_t color, uint8_t *framebuffer);

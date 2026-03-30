@@ -69,7 +69,7 @@ void i2s_bus_init(i2s_bus_config *cfg);
 /**
  * @brief Get the currently writable line buffer.
  */
-volatile uint8_t IRAM_ATTR *i2s_get_current_buffer();
+volatile uint8_t *i2s_get_current_buffer();
 
 /**
  * @brief Switches front and back line buffer.
@@ -77,17 +77,17 @@ volatile uint8_t IRAM_ATTR *i2s_get_current_buffer();
  * @note If the switched-to line buffer is currently in use, this function
  *       blocks until transmission is done.
  */
-void IRAM_ATTR i2s_switch_buffer();
+void i2s_switch_buffer();
 
 /**
  * @brief Start transmission of the current back buffer.
  */
-void IRAM_ATTR i2s_start_line_output();
+void i2s_start_line_output();
 
 /**
  * @brief Returns true if there is an ongoing transmission.
  */
-bool IRAM_ATTR i2s_is_busy();
+bool i2s_is_busy();
 
 /**
  * @brief Give up allocated resources.

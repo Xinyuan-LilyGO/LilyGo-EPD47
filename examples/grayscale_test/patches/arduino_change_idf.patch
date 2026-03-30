@@ -22,7 +22,7 @@ Index: grayscale_test/main/grayscale_test.c
 ===================================================================
 --- /dev/null
 +++ grayscale_test/main/grayscale_test.c
-@@ -0,0 +1,90 @@
+@@ -0,0 +1,88 @@
 +/* Simple firmware for a ESP32 displaying a static image on an EPaper Screen.
 + *
 + * Write an image into a header file using a 3...2...1...0 format per pixel,
@@ -61,7 +61,6 @@ Index: grayscale_test/main/grayscale_test.c
 +    }
 +
 +    uint8_t grayscale_line[EPD_WIDTH / 2];
-+    uint8_t value = 0;
 +    for (uint32_t i = 0; i < EPD_WIDTH / 2; i++) {
 +        uint8_t segment = i / (EPD_WIDTH / 16 / 2);
 +        grayscale_line[i] = (segment << 4) | segment;
@@ -70,7 +69,6 @@ Index: grayscale_test/main/grayscale_test.c
 +        memcpy(grayscale_img + EPD_WIDTH / 2 * y, grayscale_line, EPD_WIDTH / 2);
 +    }
 +
-+    value = 0;
 +    for (uint32_t i = 0; i < EPD_WIDTH / 2; i++) {
 +        uint8_t segment = (EPD_WIDTH / 2 - i - 1) / (EPD_WIDTH / 16 / 2);
 +        grayscale_line[i] = (segment << 4) | segment;
@@ -97,7 +95,7 @@ Index: grayscale_test/main/grayscale_test.c
 +    epd_push_pixels(epd_full_screen(), 20, 0);
 +    epd_draw_image(epd_full_screen(), grayscale_img2, WHITE_ON_BLACK);
 +    t2 = esp_timer_get_time();
-+    printf("draw took %dms.\n", (t2 - t1) / 1000);
++    printf("draw took %ldms.\n", (t2 - t1) / 1000);
 +    epd_poweroff();
 +
 +    vTaskDelay(3000 / portTICK_PERIOD_MS);
@@ -108,7 +106,7 @@ Index: grayscale_test/main/grayscale_test.c
 +    t1 = esp_timer_get_time();
 +    epd_draw_image(epd_full_screen(), grayscale_img, BLACK_ON_WHITE);
 +    t2 = esp_timer_get_time();
-+    printf("draw took %dms.\n", (t2 - t1) / 1000);
++    printf("draw took %ldms.\n", (t2 - t1) / 1000);
 +    epd_poweroff();
 +    vTaskDelay(3000 / portTICK_PERIOD_MS);
 +
@@ -2974,3 +2972,18 @@ Index: grayscale_test/sdkconfig.esp32s3
 +CONFIG_SEMIHOSTFS_MAX_MOUNT_POINTS=1
 +CONFIG_SEMIHOSTFS_HOST_PATH_MAX_LEN=128
 +# End of deprecated options
+Index: grayscale_test/sdkconfig.defaults
+===================================================================
+--- /dev/null
++++ grayscale_test/sdkconfig.defaults
+@@ -0,0 +1,10 @@
++    # This file was generated using idf.py save-defconfig. It can be edited manually.
++    # Espressif IoT Development Framework (ESP-IDF) 6.0.0 Project Minimal Configuration
++    #
++    # default:
++CONFIG_IDF_TARGET="esp32s3"
++CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
++CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
++CONFIG_LCD_ENABLE_DEBUG_LOG=y
++CONFIG_SPIRAM=y
++CONFIG_SPIRAM_MODE_OCT=y

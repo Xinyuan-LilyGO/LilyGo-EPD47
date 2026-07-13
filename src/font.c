@@ -411,7 +411,7 @@ static void IRAM_ATTR draw_char(const GFXfont *font,
         bool byte_complete = start_pos % 2;
         int32_t x = max(0, -start_pos);
         int32_t max_x = min(start_pos + width, buf_width * 2);
-        for (int32_t xx = start_pos; xx < max_x; xx++)
+        for (int32_t xx = max(0, start_pos); xx < max_x; xx++)
         {
             uint32_t buf_pos = yy * buf_width + xx / 2;
             uint8_t old = buffer[buf_pos];

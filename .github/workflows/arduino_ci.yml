@@ -40,8 +40,9 @@ jobs:
           arduino-cli core update-index ;
           arduino-cli core install esp32:esp32@2.0.17 ;
 
-          arduino-cli lib install "SensorLib"
-          arduino-cli lib install "Button2"
+          arduino-cli lib install "SensorLib@0.3.1"
+          arduino-cli lib install "Button2@2.3.2"
+          arduino-cli lib install "ArduinoJson@7.4.2"
 
       - name: Build examples
         run: |

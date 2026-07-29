@@ -164,7 +164,11 @@ void setup()
     esp_adc_cal_characteristics_t adc_chars;
     esp_adc_cal_value_t val_type = esp_adc_cal_characterize(
                                        ADC_UNIT_2,
+#if ESP_ARDUINO_VERSION < ESP_ARDUINO_VERSION_VAL(2,0,17)
+                                       ADC_ATTEN_DB_11,
+#else
                                        ADC_ATTEN_DB_12,
+#endif
                                        ADC_WIDTH_BIT_12,
                                        1100,
                                        &adc_chars

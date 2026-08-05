@@ -6,7 +6,7 @@
 
 - The driver and sample program are from [vroland/epdiy](https://github.com/vroland/epdiy)
 
-## 1️⃣Support Product
+## 1️⃣ Support Product
 
 | Product(PinMap)   | SOC        | Flash | PSRAM    | Resolution | Size     |
 | ----------------- | ---------- | ----- | -------- | ---------- | -------- |
@@ -18,7 +18,7 @@
 
 [1]: https://www.lilygo.cc/products/t5-4-7-inch-e-paper-v2-3
 
-## 2️⃣Examples
+## 2️⃣ Examples
 
 ```txt
 examples/
@@ -33,7 +33,7 @@ examples/
 └── wifi_sync           ; WiFi Comprehensive Example
 ```
 
-## 3️⃣ PlatformIO Quick Start (Recommended)
+## 3️⃣ PlatformIO Quick Start (recommended)
 
 1. Install [Visual Studio Code](https://code.visualstudio.com/) and [Python](https://www.python.org/)
 2. Search for the `PlatformIO` plugin in the `VisualStudioCode` extension and install it.
@@ -51,7 +51,7 @@ examples/
 ## 4️⃣ Install from Arduino Library Manager (recommended)
 
 1. Install [Arduino IDE](https://www.arduino.cc/en/software)
-2. Install [Arduino ESP32 V 2.0.5 or above and below V3.0](https://docs.espressif.com/projects/arduino-esp32/en/latest/) ，recommended to use version 2.0.15, the URL is as follows 
+2. Install [Arduino ESP32 V 2.0.5 or above and below V3.0](https://docs.espressif.com/projects/arduino-esp32/en/latest/) ，recommended to use version 2.0.15, the URL is as follows
     Steps: Arduino IDE -> Preferences -> Additional boards manager URLs
     ```url
     https://espressif.github.io/arduino-esp32/package_esp32_index.json
@@ -86,15 +86,36 @@ examples/
 8. Click `upload` , Wait for compilation and writing to complete
 9.  If it cannot be written, or the USB device keeps flashing, please check the **FAQ** below
 
+## 5️⃣ Install from Arduino CLI (recommended)
 
-## 5️⃣ Related Projects
+1. Install the [Arduino CLI](https://arduino.github.io/arduino-cli/latest/installation)
+2. Run these commands to set up the environment:
+
+    ```shell
+    arduino-cli config init
+    arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+    arduino-cli core update-index
+    arduino-cli core install esp32:esp32@2.0.17
+    arduino-cli lib install "SensorLib@0.3.1"
+    arduino-cli lib install "Button2@2.3.2"
+    arduino-cli lib install "ArduinoJson@7.4.2"
+    arduino-cli lib install LilyGo-EPD47
+    ```
+
+3. Run this command to compile your sketch:
+
+    ```shell
+    arduino-cli compile -besp32:esp32:esp32s3:CDCOnBoot=cdc,FlashSize=16M,PartitionScheme=app3M_fat9M_16MB,PSRAM=opi
+    ```
+
+## 6️⃣ Related Projects
 
 - [OpenWeather Display](https://github.com/Xinyuan-LilyGO/LilyGo-EPD-4-7-OWM-Weather-Display/tree/web)
 - [EPD47-HC08](https://github.com/Xinyuan-LilyGO/EPD47-HC08.git)
 - [Variometer](https://github.com/Oganisyan/Variometer-LilyGoEPD47)
 
 
-# 6️⃣ ESP32 basic examples
+## 7️⃣ ESP32 basic examples
 
 - [BLE Examples](https://github.com/espressif/arduino-esp32/tree/master/libraries/BLE)
 - [WiFi Examples](https://github.com/espressif/arduino-esp32/tree/master/libraries/WiFi)
@@ -102,7 +123,7 @@ examples/
 - [FFat Examples](https://github.com/espressif/arduino-esp32/tree/master/libraries/FFat)
 - For more examples of esp32 chip functions, please refer to [arduino-esp32-libraries](https://github.com/espressif/arduino-esp32/tree/master/libraries)
 
-# 7️⃣ FAQ
+## 8️⃣ FAQ
 
 1. Which one does the sleep current measurement example use? ?
 
@@ -116,7 +137,7 @@ examples/
 3. The board uses USB as the JTAG upload port. When printing serial port information on USB_CDC_ON_BOOT configuration needs to be turned on.
 If the port cannot be found when uploading the program or the USB has been used for other functions, the port does not appear.
 Please enter the upload mode manually.
-   
+
    ![product](images/product.jpg)
 
    1. Connect the board via the USB cable
@@ -125,7 +146,7 @@ Please enter the upload mode manually.
    4. Release the BOOT(IO0) button
    5. Upload sketch
 
-# 8️⃣ GPIO List
+## 9️⃣ GPIO List
 
 | ESP32S3 GPIO | Connect To          | Free |
 | ------------ | ------------------- | ---- |
@@ -160,4 +181,3 @@ Please enter the upload mode manually.
 - The GPIOs marked with ✅ are free to use. GPIO10 Can be used for analog input, but not for others.
 - SD Pin If you don't use an SD card, these GPIOs(16,15,11,42) are free to use.
 - ESP cannot be woken up by touch interrupt because RTC_GPIO is not connected to touch interrupt in design. However, GPIO10 can be connected to GPIO47 to make touch wake-up function possible. Please see here [issues/93](https://github.com/Xinyuan-LilyGO/LilyGo-EPD47/issues/93#issuecomment-2488500117)
-

@@ -1,6 +1,6 @@
 {
   "name": "LilyGo-EPD47",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "LilyGo epaper 4.7 inches Arduino library",
   "keywords": "lilygo,epaper",
   "authors": [
@@ -39,7 +39,11 @@
     {
       "owner": "lewisxhe",
       "name": "SensorLib",
-      "version": "0.1.9"
+      "version": "0.3.1"
+    },
+    {
+      "name": "ArduinoJson",
+      "version": "7.4.3"
     }
   ],
   "examples": ["examples/*/*.ino"],

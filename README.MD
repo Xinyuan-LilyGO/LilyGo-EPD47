@@ -125,16 +125,19 @@ examples/
 
 ## 8️⃣ FAQ
 
-1. Which one does the sleep current measurement example use? ?
+1. Is there no voltage at the Molex connector?
+    * The voltage for the Molex connector is controlled by Pin 13 of the **74HCT4094** (schematic reference QP5); software must call `epd_poweron()` to enable it. Since the Molex connector shares the same power supply as the screen, the Molex voltage is cut off when the screen power is turned off; `epd_poweroff()` shuts down power to both the screen and the Molex connector.
+
+2. Which one does the sleep current measurement example use? ?
 
     Sleep current test measured by [demo](./examples/demo/demo.ino) example
 
-2. How to fix afterimages?
+3. How to fix afterimages?
 
     Please upload [examples/screen_repair](./examples/screen_repair) to try to remove afterimages.
     It is not 100% able to remove afterimages.
 
-3. The board uses USB as the JTAG upload port. When printing serial port information on USB_CDC_ON_BOOT configuration needs to be turned on.
+4. The board uses USB as the JTAG upload port. When printing serial port information on USB_CDC_ON_BOOT configuration needs to be turned on.
 If the port cannot be found when uploading the program or the USB has been used for other functions, the port does not appear.
 Please enter the upload mode manually.
 

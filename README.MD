@@ -197,3 +197,4 @@ Please enter the upload mode manually.
 | 📍**VBAT** ( Pin header) | 4.2V      |
 
 * Molex connector and 3.3V Pin Header no more than 100mA load
+* 5V power source from USB-C, load capacity depends on USB-C adapter

@@ -127,6 +127,7 @@ examples/
 
 1. Is there no voltage at the Molex connector?
     * The voltage for the Molex connector is controlled by Pin 13 of the **74HCT4094** (schematic reference QP5); software must call `epd_poweron()` to enable it. Since the Molex connector shares the same power supply as the screen, the Molex voltage is cut off when the screen power is turned off; `epd_poweroff()` shuts down power to both the screen and the Molex connector.
+    * Molex connector and 3.3V Pin Header no more than 100mA load
 
 2. Which one does the sleep current measurement example use? ?
 
@@ -151,36 +152,48 @@ Please enter the upload mode manually.
 
 ## 9️⃣ GPIO List
 
-| ESP32S3 GPIO | Connect To          | Free |
-| ------------ | ------------------- | ---- |
-| 13           | 74HCT4094D CFG_DATA | ❌    |
-| 12           | 74HCT4094D CFG_CLK  | ❌    |
-| 0            | 74HCT4094D CFG_STR  | ❌    |
-| 38           | E-paper CKV         | ❌    |
-| 40           | E-paper STH         | ❌    |
-| 41           | E-paper CKH         | ❌    |
-| 8            | E-paper D0          | ❌    |
-| 1            | E-paper D1          | ❌    |
-| 2            | E-paper D2          | ❌    |
-| 3            | E-paper D3          | ❌    |
-| 4            | E-paper D4          | ❌    |
-| 5            | E-paper D5          | ❌    |
-| 6            | E-paper D6          | ❌    |
-| 7            | E-paper D7          | ❌    |
-| 21           | Button              | ❌    |
-| 14           | Battery ADC         | ❌    |
-| 16           | SD MISO             | ❌*   |
-| 15           | SD MOSI             | ❌*   |
-| 11           | SD  SCK             | ❌*   |
-| 42           | SD  CS              | ❌*   |
-| 18           | SDA                 | ❌    |
-| 17           | SCL                 | ❌    |
-| 47           | TouchPanel IRQ      | ❌    |
-| 45           | No Connect any      | ✅    |
-| 10           | No Connect any      | ✅    |
-| 48           | No Connect any      | ✅    |
-| 39           | No Connect any      | ✅    |
+| ESP32S3 GPIO | Connect To            | Free |
+| ------------ | --------------------- | ---- |
+| 13           | 74HCT4094D CFG_DATA   | ❌    |
+| 12           | 74HCT4094D CFG_CLK    | ❌    |
+| 0            | 74HCT4094D CFG_STR    | ❌    |
+| 38           | E-paper CKV           | ❌    |
+| 40           | E-paper STH           | ❌    |
+| 41           | E-paper CKH           | ❌    |
+| 8            | E-paper D0            | ❌    |
+| 1            | E-paper D1            | ❌    |
+| 2            | E-paper D2            | ❌    |
+| 3            | E-paper D3            | ❌    |
+| 4            | E-paper D4            | ❌    |
+| 5            | E-paper D5            | ❌    |
+| 6            | E-paper D6            | ❌    |
+| 7            | E-paper D7            | ❌    |
+| 21           | Button                | ❌    |
+| 14           | Battery ADC           | ❌    |
+| 16           | SD MISO               | ❌*   |
+| 15           | SD MOSI               | ❌*   |
+| 11           | SD  SCK               | ❌*   |
+| 42           | SD  CS                | ❌*   |
+| 18           | RTC (Touchscreen) SDA | ❌    |
+| 17           | RTC (Touchscreen) SCL | ❌    |
+| 47           | TouchPanel IRQ        | ❌    |
+| 45           | No Connect any        | ✅    |
+| 10           | No Connect any        | ✅    |
+| 48           | No Connect any        | ✅    |
+| 39           | No Connect any        | ✅    |
 
 - The GPIOs marked with ✅ are free to use. GPIO10 Can be used for analog input, but not for others.
 - SD Pin If you don't use an SD card, these GPIOs(16,15,11,42) are free to use.
 - ESP cannot be woken up by touch interrupt because RTC_GPIO is not connected to touch interrupt in design. However, GPIO10 can be connected to GPIO47 to make touch wake-up function possible. Please see here [issues/93](https://github.com/Xinyuan-LilyGO/LilyGo-EPD47/issues/93#issuecomment-2488500117)
+
+
+### ⚡ Electrical parameters
+
+| Features                | Details   |
+| ----------------------- | --------- |
+| 🔗USB-C Input Voltage    | 5V        |
+| 🔋Battery Voltage        | 3.7V~4.2V |
+| 📍**VBUS** ( Pin header) | 5V        |
+| 📍**VBAT** ( Pin header) | 4.2V      |
+
+* Molex connector and 3.3V Pin Header no more than 100mA load

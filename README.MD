@@ -150,6 +150,9 @@ Please enter the upload mode manually.
    4. Release the BOOT(IO0) button
    5. Upload sketch
 
+5. Grove interface model?
+   * **PH2.0 4Pin**
+
 ## 9️⃣ GPIO List
 
 | ESP32S3 GPIO | Connect To            | Free |
